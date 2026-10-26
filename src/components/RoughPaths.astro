@@ -1,0 +1,12 @@
+---
+// Renders path data from src/lib/rough.ts. Colour comes from the class, never inline.
+import type { RoughPath } from "../lib/rough";
+
+interface Props {
+  paths: RoughPath[];
+}
+
+const { paths } = Astro.props;
+---
+
+{paths.map((p) => <path d={p.d} class={p.cls} stroke-width={p.width} stroke-dasharray={p.dash} />)}

@@ -1,0 +1,294 @@
+---
+/*
+  Shared style-tile body: site header, hero row, one selected-systems row.
+  Copy is a draft (hero ≤ 60 words, from the plan's §4 draft minus the claims flagged
+  as needing support). Numbers are the résumé's own and are marked as a specimen until
+  the metrics registry exists (P2.T1).
+*/
+import ErSketch from "./ErSketch.astro";
+import RiskCoverageThumb from "./RiskCoverageThumb.astro";
+
+// Specimen values: résumé figures, typed once here until src/content/metrics exists.
+const specimen = {
+  accuracy: "93%",
+  coverage: "94%",
+  scored: "165M",
+  records: "600M",
+};
+---
+
+<header class="site-head frame">
+  <a class="wordmark" href="#top">Aditya Rathi</a>
+  <nav aria-label="Main">
+    <a href="#work">Work</a>
+    <a href="#resume">Résumé</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+      <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"></path>
+    </svg>
+  </button>
+</header>
+
+<main id="top" class="frame">
+  <section class="hero" aria-labelledby="hero-name">
+    <div class="hero-text">
+      <h1 id="hero-name">Aditya Rathi</h1>
+      <p class="role">Machine Learning Engineer at Burning Glass Institute, New York</p>
+      <p class="lede">
+        I build the machine learning behind the Credential Value Index: domain-adapted encoders, entity resolution across
+        twenty data sources, and classifiers over hundreds of millions of records, shipped with CI/CD and drift-triggered
+        retraining. Below are five systems, each with its baseline and what I got wrong.
+      </p>
+      <p class="proof">
+        <a href="https://github.com/AdityaRathi2000">GitHub</a>
+        <a href="https://www.linkedin.com/in/aditya-rathi">LinkedIn</a>
+        <a href="#resume">Résumé (PDF)</a>
+      </p>
+    </div>
+    <figure class="hero-figure">
+      <ErSketch />
+      <figcaption>
+        <em>Synthetic data, real mechanism.</em> Entity resolution on one fictional provider: blocking, pairwise judgement,
+        then a merge.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section id="work" class="systems" aria-labelledby="systems-title">
+    <h2 id="systems-title">Selected systems</h2>
+
+    <article class="system-row specimen" aria-labelledby="row-classifier">
+      <div class="system-thumb">
+        <RiskCoverageThumb />
+      </div>
+      <div class="system-body">
+        <h3 id="row-classifier">An education classifier over <span class="num">{specimen.records}</span> records</h3>
+        <p>
+          A multi-domain classifier that holds back the cases it is unsure about and retrains when its inputs drift.
+        </p>
+        <p class="metric">
+          <span class="num">{specimen.accuracy}</span> accuracy at <span class="num">{specimen.coverage}</span> coverage on
+          the <span class="nowrap"><span class="num">{specimen.scored}</span>-record</span> US slice.
+        </p>
+        <p><a href="#work">Read the case study</a></p>
+      </div>
+      <details class="margin-note">
+        <summary>Baseline and sample size</summary>
+        <p>
+          Comparator and holdout size pending. The <span class="num">{specimen.scored}</span> figure is the scored population,
+          not the evaluation set; the holdout <i>n</i> and a 95% interval come from the numbers worksheet in phase 2.
+        </p>
+      </details>
+      <p class="specimen-tag">Specimen row: résumé figures, comparator pending.</p>
+    </article>
+  </section>
+</main>
+
+<style>
+  /* ---------- Header ---------- */
+  .site-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    padding-block: var(--space-m);
+  }
+
+  .wordmark {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-right: auto;
+  }
+
+  .site-head nav {
+    display: flex;
+    gap: var(--space-m);
+  }
+
+  .wordmark,
+  .site-head nav a,
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 479px) {
+    .site-head,
+    .site-head nav {
+      gap: var(--space-s);
+    }
+
+    .site-head nav {
+      font-size: var(--step--1);
+    }
+  }
+
+  .site-head nav a {
+    color: var(--ink);
+    text-decoration-color: transparent;
+  }
+
+  .site-head nav a:hover {
+    text-decoration-color: var(--ink-2);
+  }
+
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -11px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+    border-radius: 50%;
+  }
+
+  .theme-toggle:hover {
+    background: var(--paper-2);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    display: grid;
+    gap: var(--space-l) var(--space-xl);
+    padding-block: var(--space-xl) 0;
+  }
+
+  .hero-text {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .role {
+    font-size: var(--step-1);
+    line-height: 1.3;
+    margin-top: calc(var(--space-2xs) * -1);
+  }
+
+  .lede {
+    max-width: var(--measure);
+  }
+
+  .proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+  }
+
+  .proof a {
+    color: var(--ink);
+    text-decoration-color: var(--ink-2);
+  }
+
+  .proof a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+
+
+  .hero-figure figcaption {
+    margin-top: var(--space-xs);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+
+  .hero-figure figcaption em {
+    color: var(--ink);
+  }
+
+  @media (min-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      align-items: start;
+    }
+
+    .hero-text {
+      padding-top: var(--space-l);
+    }
+
+    .lede {
+      max-width: 52ch;
+    }
+  }
+
+  /* ---------- Selected systems ---------- */
+  .systems {
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .systems h2 {
+    margin-bottom: var(--space-l);
+  }
+
+  .system-row {
+    display: grid;
+    gap: var(--space-m) var(--space-l);
+    align-items: start;
+  }
+
+  .system-thumb {
+    max-width: 16rem;
+  }
+
+  .system-body {
+    display: grid;
+    gap: var(--space-xs);
+    max-width: 56ch;
+  }
+
+  .system-body h3 {
+    margin-bottom: var(--space-3xs);
+  }
+
+  .metric {
+    font-size: var(--step-1);
+    line-height: 1.35;
+  }
+
+  .specimen {
+    border: 1.5px dashed color-mix(in srgb, var(--ink-2) 75%, transparent);
+    border-radius: 2px;
+    padding: var(--space-m);
+  }
+
+  .specimen-tag {
+    font-size: var(--step--1);
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  @media (min-width: 760px) {
+    .system-row {
+      grid-template-columns: 14rem minmax(0, 1fr);
+    }
+
+    .system-row > .margin-note,
+    .system-row > .specimen-tag {
+      grid-column: 2;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .system-row {
+      grid-template-columns: 14rem minmax(0, 1fr) 15rem;
+    }
+
+    .system-row > .margin-note {
+      grid-column: 3;
+      grid-row: 1;
+      padding-top: var(--space-xs);
+    }
+
+    .system-row > .specimen-tag {
+      grid-column: 2 / 4;
+    }
+  }
+</style>

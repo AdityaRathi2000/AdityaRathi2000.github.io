@@ -1,0 +1,110 @@
+---
+/*
+  Style-tile shell (P1.T4). Same markup for every tile; only the serif changes.
+  The two losing tiles and fonts-candidates.css are deleted once Aditya picks.
+*/
+import { statSync } from "node:fs";
+import "../styles/global.css";
+import "../styles/fonts-candidates.css";
+
+interface Props {
+  letter: "A" | "B" | "C";
+  fontName: string;
+  family: string;
+  romanFile: string;
+}
+
+const { letter, fontName, family, romanFile } = Astro.props;
+const romanKb = Math.round(statSync(`public/fonts/${romanFile}`).size / 1024);
+const tiles = [
+  { letter: "A", href: "/tiles/a/", name: "Literata" },
+  { letter: "B", href: "/tiles/b/", name: "Piazzolla" },
+  { letter: "C", href: "/tiles/c/", name: "Castoro" },
+];
+---
+
+<!doctype html>
+<html lang="en" style={`--font-serif: ${family};`}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Style tile {letter}: {fontName}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preload" href={`/fonts/${romanFile}`} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script is:inline>
+      // Theme before first paint: ?theme= wins, then the saved choice, else the OS.
+      (function () {
+        var t = new URLSearchParams(location.search).get("theme");
+        try {
+          t = t || localStorage.getItem("theme");
+        } catch (e) {}
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="tile-bar">
+      <p class="frame">
+        Style tile {letter}: {fontName} with IBM Plex Mono. Serif roman file {romanKb} KB.
+        <span class="tile-switch">
+          Compare
+          {
+            tiles.map((t) => (
+              <a href={t.href} aria-current={t.letter === letter ? "page" : undefined}>
+                {t.letter} {t.name}
+              </a>
+            ))
+          }
+        </span>
+      </p>
+    </div>
+    <slot />
+    <script is:inline>
+      document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var root = document.documentElement;
+          var dark = root.dataset.theme
+            ? root.dataset.theme === "dark"
+            : matchMedia("(prefers-color-scheme: dark)").matches;
+          var next = dark ? "light" : "dark";
+          root.dataset.theme = next;
+          try {
+            localStorage.setItem("theme", next);
+          } catch (e) {}
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .tile-bar {
+    background: var(--paper-2);
+    color: var(--ink-2);
+    font-size: var(--step--1);
+    padding-block: var(--space-2xs);
+  }
+
+  .tile-bar p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    justify-content: space-between;
+  }
+
+  .tile-switch {
+    display: flex;
+    gap: var(--space-s);
+  }
+
+  .tile-switch a {
+    color: var(--ink-2);
+  }
+
+  .tile-switch a[aria-current="page"] {
+    color: var(--ink);
+    text-decoration: none;
+  }
+</style>
