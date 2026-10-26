@@ -1,0 +1,75 @@
+/*
+  Design tokens. Source of truth: docs/design/tokens.md (plan §5).
+  Colour roles only; nothing here has layout.
+*/
+
+:root {
+  color-scheme: light;
+
+  --paper: #f2eee6;
+  --paper-2: #e8e2d6;
+  --ink: #1e2230;
+  --ink-2: #5a5f70;
+  --accent: #2e3a8c;
+  --accent-wash: #dce0f5;
+  --data: #b5443c;
+
+  /* Type families. Piazzolla chosen at the P1.T4 tile gate (2026-10-26). */
+  --font-serif: "Piazzolla", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; /* taste-skill-ignore: plan §5 */
+
+  /*
+    Fluid type, Utopia-style: linear between a 390px and a 1440px viewport.
+    slope = (max - min) / (1440 - 390); intercept = min - slope * 390.
+  */
+  --step--1: clamp(0.9375rem, 0.9143rem + 0.0952vw, 1rem);       /* 15 → 16 px: captions, margin notes */
+  --step-0: clamp(1.125rem, 1.0786rem + 0.1905vw, 1.25rem);       /* 18 → 20 px: body */
+  --step-1: clamp(1.25rem, 1.1571rem + 0.381vw, 1.5rem);          /* 20 → 24 px: h3, role line */
+  --step-2: clamp(1.6rem, 1.3771rem + 0.9143vw, 2.2rem);          /* 25.6 → 35.2 px: h2 */
+  --step-3: clamp(2.4rem, 1.62rem + 3.2vw, 4.5rem);               /* 38.4 → 72 px: h1 / hero */
+
+  --leading-body: 1.55;
+  --leading-display: 1.04;
+  --measure: 68ch;
+
+  /* Space: one scale, used for gaps and section rhythm. */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.5rem;
+  --space-xl: clamp(3rem, 2.2rem + 3.3vw, 5.5rem);
+  --space-2xl: clamp(5rem, 3.6rem + 5.7vw, 9rem);                 /* between sections */
+
+  --gutter: clamp(1rem, 0.55rem + 1.9vw, 2.25rem);                /* outer page margin */
+  --band: 1100px;                                                  /* figure band */
+
+  --radius-s: 3px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Dark: follows the OS unless the visitor picked light. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #1a1d27;
+    --paper-2: #232736;
+    --ink: #e8e3d8;
+    --ink-2: #a9adbb;
+    --accent: #9db0ff;
+    --accent-wash: #2b3561;
+    --data: #f08c84;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #1a1d27;
+  --paper-2: #232736;
+  --ink: #e8e3d8;
+  --ink-2: #a9adbb;
+  --accent: #9db0ff;
+  --accent-wash: #2b3561;
+  --data: #f08c84;
+}

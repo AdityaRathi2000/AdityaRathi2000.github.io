@@ -40,3 +40,8 @@ Every PR into `redesign` is checked against this list. Source: plan §4 (agent-s
 - Home: ≤ 60 KB first-load JS + ≤ 40 KB lazy. Case study: ≤ 40 KB + ≤ 60 KB for one island.
 - Lighthouse: perf ≥ 95; a11y, best practices, SEO = 100; LCP ≤ 1.5 s; CLS 0; TBT ≤ 100 ms.
 - ≤ 2 font files on first paint.
+
+## Known risks (measured)
+
+- **LCP headroom is thin (P1, 2026-10-26).** Lighthouse mobile simulation on a text-only page: LCP 1.35 s against the 1.5 s budget (TTFB 0.45 s + render delay 0.9 s, mostly font bytes). The style tile, which adds the hero figure's italic annotations, measured 1.65 s: the Piazzolla italic file (55 KB) competes with the roman. Weight-only Piazzolla files (32 + 33 KB, no optical-size axis) brought it to 1.50 s; subsetting saves only ~11 %; inlining the 2.7 KB stylesheet made no measurable difference. Decide in P4 before the hero ships: drop the Plex Mono preload, load the italic with `font-display: optional`, or switch to weight-only files. `/tiles/` is excluded from Lighthouse CI for this reason; it is a noindex design reference removed in P4.
+- **Accepted advisory: `extract-zip` ≤ 2.0.1 (2 high, no patched release), accepted by Aditya 2026-10-26.** Reached only through `@lhci/cli > lighthouse > puppeteer-core > @puppeteer/browsers`, which uses it to unpack a downloaded browser archive. Lighthouse CI here always runs against an installed Chrome, so that path never executes, and the package is a dev dependency that never ships. `tmp`, `uuid`, `basic-ftp` and `zod` advisories from the same tree are fixed with `pnpm.overrides` in package.json. The weekly workflow prints `pnpm audit` so a fix shows up; drop the override block when upstream catches up.

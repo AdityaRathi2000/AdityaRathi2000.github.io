@@ -1,0 +1,265 @@
+@import "./tokens.css";
+@import "./fonts.css";
+
+/* ---------- Reset ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scrollbar-color: var(--ink-2) var(--paper);
+  hanging-punctuation: first last;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--step-0);
+  line-height: var(--leading-body);
+  font-optical-sizing: auto;
+  font-synthesis: none;
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--accent);
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Type ---------- */
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  line-height: var(--leading-display);
+  text-wrap: balance;
+  letter-spacing: -0.015em;
+}
+
+h1 {
+  font-size: var(--step-3);
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+}
+
+h2 {
+  font-size: var(--step-2);
+}
+
+h3 {
+  font-size: var(--step-1);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+
+p,
+li,
+dd {
+  text-wrap: pretty;
+}
+
+em,
+i {
+  font-style: italic;
+}
+
+/* Numbers: mono, tabular, lining. Never for labels. */
+.num {
+  font-family: var(--font-mono); /* taste-skill-ignore: numerals only, plan §5 */
+  font-size: 0.88em;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--font-mono); /* taste-skill-ignore: numerals only, plan §5 */
+  font-size: 0.88em;
+}
+
+/* ---------- Links and browser surfaces ---------- */
+
+/*
+  Links are ink with an indigo underline; the accent fills in on hover.
+  This keeps solid accent to one use per viewport (plan §5), however many links a paragraph has.
+*/
+a {
+  color: var(--ink);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  transition:
+    color 160ms var(--ease-out),
+    text-decoration-color 160ms var(--ease-out);
+}
+
+a:hover {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-s);
+}
+
+::selection {
+  background: var(--accent-wash);
+  color: var(--ink);
+}
+
+/* ---------- Layout primitives ---------- */
+
+/* Page frame: equal outer margins, figure band as the widest thing. */
+.frame {
+  width: min(100% - 2 * var(--gutter), var(--band));
+  margin-inline: auto;
+}
+
+/* Text column. */
+.measure {
+  max-width: var(--measure);
+}
+
+/*
+  Prose with margin notes. Below 1200px a note is a <details> footnote in the flow;
+  at 1200px and up it moves into a right-hand column next to the claim it supports.
+*/
+.with-notes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--space-l);
+}
+
+.margin-note {
+  font-size: var(--step--1);
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.margin-note summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  width: fit-content;
+}
+
+.margin-note[open] summary {
+  margin-bottom: var(--space-3xs);
+}
+
+@media (min-width: 1200px) {
+  .with-notes {
+    grid-template-columns: minmax(0, var(--measure)) minmax(14rem, 1fr);
+  }
+
+  .with-notes > :not(.margin-note) {
+    grid-column: 1;
+  }
+
+  .with-notes > .margin-note {
+    grid-column: 2;
+  }
+
+  /* Footnote chrome goes away on wide screens; the note is simply there. */
+  .margin-note summary {
+    display: none;
+  }
+
+  /* A closed <details> hides its body via ::details-content; reveal it on wide screens. */
+  .margin-note::details-content {
+    content-visibility: visible;
+    display: block;
+  }
+}
+
+/* Hand-drawn SVG: strokes follow the text colour so one file serves both themes. */
+.rough {
+  color: var(--ink);
+  overflow: visible;
+}
+
+.rough .r-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rough .r-fill {
+  fill: none;
+  stroke: var(--accent-wash);
+}
+
+.rough .r-solid {
+  fill: var(--paper);
+  stroke: none;
+}
+
+.rough .r-accent {
+  stroke: var(--accent);
+}
+
+.rough .r-muted {
+  stroke: var(--ink-2);
+}
+
+.rough text {
+  fill: currentColor;
+  font-family: var(--font-serif);
+}
+
+.rough .r-note {
+  fill: var(--ink-2);
+  font-style: italic;
+}
+
+/* ---------- Motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Utilities ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

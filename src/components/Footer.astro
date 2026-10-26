@@ -1,0 +1,32 @@
+---
+import { buildInfo } from "../lib/build-info";
+---
+
+<footer class="site-foot frame">
+  <p>
+    Deployed <time datetime={buildInfo.date}>{buildInfo.dateLabel}</time>{
+      buildInfo.shortSha && (
+        <>
+          {" "}from commit <a class="num" href={buildInfo.commitUrl}>{buildInfo.shortSha}</a>
+        </>
+      )
+    }. <a href="/colophon/">Colophon</a>
+  </p>
+</footer>
+
+<style>
+  .site-foot {
+    padding-block: var(--space-xl) var(--space-l);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .site-foot a {
+    color: var(--ink-2);
+    text-decoration-color: color-mix(in srgb, var(--ink-2) 50%, transparent);
+  }
+
+  .site-foot a:hover {
+    color: var(--ink);
+  }
+</style>

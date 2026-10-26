@@ -1,0 +1,67 @@
+---
+import ThemeToggle from "./ThemeToggle.astro";
+
+const links = [
+  { href: "/#work", label: "Work" },
+  // /resume is wired to public/resume.pdf in P2.T4.
+  { href: "/resume", label: "Résumé" },
+  { href: "/#contact", label: "Contact" },
+];
+const here = Astro.url.pathname;
+---
+
+<header class="site-head frame">
+  <a class="wordmark" href="/" aria-current={here === "/" ? "page" : undefined}>Aditya Rathi</a>
+  <nav aria-label="Main">
+    {links.map((l) => <a href={l.href}>{l.label}</a>)}
+  </nav>
+  <ThemeToggle />
+</header>
+
+<style>
+  .site-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    padding-block: var(--space-m);
+  }
+
+  .wordmark {
+    margin-right: auto;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: var(--step-0);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  nav {
+    display: flex;
+    gap: var(--space-m);
+  }
+
+  nav a {
+    color: var(--ink);
+    text-decoration-color: transparent;
+  }
+
+  nav a:hover {
+    text-decoration-color: var(--ink-2);
+  }
+
+  .wordmark,
+  nav a {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 479px) {
+    .site-head,
+    nav {
+      gap: var(--space-s);
+    }
+
+    nav {
+      font-size: var(--step--1);
+    }
+  }
+</style>

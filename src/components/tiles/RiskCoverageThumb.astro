@@ -1,0 +1,38 @@
+---
+/*
+  Row thumbnail for the classifier: the shape of a risk-coverage curve with the operating
+  point marked. Illustrative shape, no values on the axes; it sits inside the specimen frame.
+*/
+import { sketch } from "../../lib/rough";
+import RoughPaths from "../RoughPaths.astro";
+
+const s = sketch(600);
+
+const axes = [...s.line(28, 14, 28, 132, { width: 1.2 }), ...s.line(28, 132, 212, 132, { width: 1.2 })];
+const curve = s.curve(
+  [
+    [34, 126],
+    [84, 121],
+    [128, 112],
+    [160, 98],
+    [184, 76],
+    [200, 50],
+    [208, 24],
+  ],
+  { width: 1.6 },
+);
+const guides = [...s.line(186, 74, 186, 132, { tone: "muted", dash: [3, 4], width: 1 }), ...s.line(28, 74, 186, 74, { tone: "muted", dash: [3, 4], width: 1 })];
+const point = s.ellipse(186, 74, 11, 11, { tone: "accent", width: 2, roughness: 0.6 });
+const frame = s.rect(4, 2, 220, 158, { width: 1.1, roughness: 0.9 });
+---
+
+<svg class="rough thumb" viewBox="0 0 228 164" role="img" aria-labelledby="rc-title">
+  <title id="rc-title">Sketch of a risk-coverage curve: error rises as the classifier answers more cases; the operating point is marked</title>
+  <RoughPaths paths={frame} />
+  <RoughPaths paths={axes} />
+  <RoughPaths paths={guides} />
+  <RoughPaths paths={curve} />
+  <RoughPaths paths={point} />
+  <text class="r-note" x="210" y="150" text-anchor="end" font-size="13">coverage</text>
+  <text class="r-note" x="20" y="30" text-anchor="end" font-size="13" transform="rotate(-90 20 30)">error</text>
+</svg>
