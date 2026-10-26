@@ -42,6 +42,10 @@ const BASE: Options = {
 // Rough.js copies `fill` into the hachure strokes; a sentinel lets us tell them apart.
 const FILL_SENTINEL = "#00f111";
 
+// Rough.js emits 15-digit coordinates; a tenth of a unit is invisible at any size we draw,
+// and rounding cuts the inline SVG to well under half its size (LCP on text-first pages).
+const compact = (d: string) => d.replace(/-?\d+\.\d+/g, (n) => String(Math.round(Number(n) * 10) / 10));
+
 export function sketch(seed: number) {
   const gen = rough.generator();
   let next = seed;
@@ -59,7 +63,7 @@ export function sketch(seed: number) {
   function toPaths(drawable: ReturnType<typeof gen.rectangle>, o: ShapeOpts): RoughPath[] {
     const tone = o.tone && o.tone !== "ink" ? ` r-${o.tone}` : "";
     return gen.toPaths(drawable).map((p) => ({
-      d: p.d,
+      d: compact(p.d),
       cls: p.stroke === FILL_SENTINEL ? "r-fill" : `r-stroke${tone}`,
       width: p.strokeWidth,
       dash: o.dash && p.stroke !== FILL_SENTINEL ? o.dash.join(" ") : undefined,

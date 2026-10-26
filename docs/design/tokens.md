@@ -25,7 +25,7 @@ Rules
 
 ## Type
 
-- Display + body: one serif, chosen at the P1.T4 tile gate from Literata / Piazzolla / Castoro (all OFL). Body 1.125→1.25 rem fluid, line-height 1.55, measure ≤ 68ch. Italic is used for diagram annotations. No handwriting font.
+- Display + body: **Piazzolla** (OFL, variable weight + optical size), chosen at the P1.T4 tile gate on 2026-10-26 over Literata and Castoro. Body 1.125→1.25 rem fluid, line-height 1.55, measure ≤ 68ch. Italic is used for diagram annotations. No handwriting font.
 - Numerals, code, chart labels: IBM Plex Mono, tabular lining figures. Mono is **not** used for UI labels or eyebrows.
 - Fluid scale (Utopia-style `clamp()`, 390 → 1440 px): body 1.125→1.25 rem; h2 1.6→2.2 rem; h1/hero 2.4→4.5 rem.
 - Sentence case everywhere. Banned: all-caps labels, tracked-out eyebrows, "WORD — fragment" labels, "→" on links, middle-dot meta strings.

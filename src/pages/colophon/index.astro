@@ -1,0 +1,28 @@
+---
+import Base from "../../layouts/Base.astro";
+---
+
+<Base title="Colophon, Aditya Rathi" description="How adityarathi.com is built: type, drawings, and hosting.">
+  <article class="measure colophon">
+    <h1>Colophon</h1>
+    <p>
+      Text is set in <a href="https://github.com/huertatipografica/piazzolla">Piazzolla</a> by Huerta Tipográfica;
+      numbers and code in <a href="https://github.com/IBM/plex">IBM Plex Mono</a> by IBM. Both are released under the
+      SIL Open Font License (<a href="/fonts/OFL-Piazzolla.txt">Piazzolla licence</a>, <a
+        href="/fonts/OFL-IBM-Plex-Mono.txt">Plex licence</a>) and served from this site.
+    </p>
+    <p>
+      The diagrams are drawn with <a href="https://roughjs.com/">Rough.js</a> when the site is built, so they arrive as
+      plain SVG with no script. The site is built with <a href="https://astro.build/">Astro</a> and hosted on GitHub Pages.
+    </p>
+    <p>No cookies.</p>
+  </article>
+</Base>
+
+<style>
+  .colophon {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-xl);
+  }
+</style>

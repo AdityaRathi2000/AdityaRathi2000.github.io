@@ -14,8 +14,8 @@
   --accent-wash: #dce0f5;
   --data: #b5443c;
 
-  /* Type families. --font-serif is overridden per style tile until P1.T4 is decided. */
-  --font-serif: "Literata", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  /* Type families. Piazzolla chosen at the P1.T4 tile gate (2026-10-26). */
+  --font-serif: "Piazzolla", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; /* taste-skill-ignore: plan §5 */
 
   /*

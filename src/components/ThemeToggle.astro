@@ -1,0 +1,74 @@
+---
+/*
+  Light/dark switch. The only JS on the base layout (budget < 1 KB inline, plan P1.T5).
+  Hidden until the script runs, so a visitor without JS never sees a dead button;
+  without JS the page simply follows prefers-color-scheme.
+  The pre-paint half lives in Base.astro's <head> to avoid a flash of the wrong theme.
+*/
+---
+
+<button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" hidden>
+  <span class="visually-hidden">Dark theme</span>
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+    <path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"></path>
+  </svg>
+</button>
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    var mq = matchMedia("(prefers-color-scheme: dark)");
+    var isDark = function () {
+      return root.dataset.theme ? root.dataset.theme === "dark" : mq.matches;
+    };
+    document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+      var sync = function () {
+        btn.setAttribute("aria-pressed", String(isDark()));
+      };
+      btn.hidden = false;
+      sync();
+      mq.addEventListener("change", sync);
+      btn.addEventListener("click", function () {
+        var next = isDark() ? "light" : "dark";
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem("theme", next);
+        } catch (e) {}
+        sync();
+      });
+    });
+  })();
+</script>
+
+<style>
+  .theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -11px;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .theme-toggle[hidden] {
+    display: none;
+  }
+
+  .theme-toggle:hover {
+    background: var(--paper-2);
+  }
+
+  .theme-toggle svg {
+    transition: transform 280ms var(--ease-out);
+  }
+
+  /* The half-filled disc turns over: the filled half faces the current theme's side. */
+  .theme-toggle[aria-pressed="true"] svg {
+    transform: rotate(180deg);
+  }
+</style>

@@ -1,21 +1,20 @@
 ---
 // Placeholder until the home page is built in phase 4.
-import "../styles/global.css";
+import Base from "../layouts/Base.astro";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <title>Aditya Rathi</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <body>
-    <main class="frame measure" style="padding-block: 4rem;">
-      <h1>Aditya Rathi</h1>
-      <p>This branch is the site redesign. The style tiles are at <a href="/tiles/a/">tile A</a>, <a href="/tiles/b/">tile B</a> and <a href="/tiles/c/">tile C</a>.</p>
-    </main>
-  </body>
-</html>
+<Base title="Aditya Rathi" description="Aditya Rathi, Machine Learning Engineer at Burning Glass Institute, New York.">
+  <section class="measure placeholder">
+    <h1>Aditya Rathi</h1>
+    <p>Machine Learning Engineer at Burning Glass Institute, New York.</p>
+    <p>This branch holds the site redesign. The chosen style is at <a href="/tiles/">the style tile</a>.</p>
+  </section>
+</Base>
+
+<style>
+  .placeholder {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-xl);
+  }
+</style>
