@@ -1,0 +1,55 @@
+---
+/*
+  The only way a number reaches a page (plan §4, veto V1).
+  Inline: value in mono, then its comparator when it has one. The long-form evidence
+  (n, interval, split, as-of) is rendered separately by <MetricNote> as a margin note.
+  A draft row never prints its value: it shows "pending" (the label goes to screen readers).
+*/
+import { getEntry } from "astro:content";
+import { formatValue, spokenValue } from "../lib/metrics";
+
+interface Props {
+  id: string;
+  /** Hide the inline comparator, e.g. inside a headline where the note carries it. */
+  bare?: boolean;
+}
+
+const { id, bare = false } = Astro.props;
+const entry = await getEntry("metrics", id);
+if (!entry) throw new Error(`<Metric id="${id}">: no such row in src/content/metrics/metrics.yaml`);
+const m = entry.data;
+const pending = m.status === "draft";
+const shown = formatValue(m);
+const spoken = spokenValue(m);
+const baseline = m.baseline ? formatValue({ value: m.baseline.value, unit: m.unit }) : null;
+---
+
+{
+  pending ? (
+    <span class="metric metric--pending" data-metric={id}>
+      pending<span class="visually-hidden">: {m.label}, still being documented</span>
+    </span>
+  ) : (
+    <span class="metric" data-metric={id}>
+      <span class="num" aria-hidden="true">{shown}</span>
+      <span class="visually-hidden">{spoken}</span>
+      {!bare && baseline && m.baseline && (
+        <span class="metric-cmp">
+          {" "}(vs {baseline} {m.baseline.label})
+        </span>
+      )}
+    </span>
+  )
+}
+
+<style>
+  .metric--pending {
+    border-bottom: 1.5px dashed var(--ink-2);
+    color: var(--ink-2);
+    font-style: italic;
+  }
+
+  .metric-cmp {
+    color: var(--ink-2);
+  }
+</style>

@@ -1,0 +1,10 @@
+org: Burning Glass Institute
+title: Machine Learning Engineer
+kind: job
+start: 2023-06
+end: null
+location: New York, NY
+summary: >-
+  The machine learning behind the Credential Value Index: entity resolution, a postings
+  extraction stack, and education classifiers over hundreds of millions of records.
+metrics: [cvi-sources, edu-records, edu-predictions]

@@ -1,21 +1,29 @@
 ---
 /*
-  Base layout: head, theme pre-paint, header, footer.
+  Base layout: head (SEO, JSON-LD, OpenGraph), theme pre-paint, header, footer.
   JS budget: the two inline theme snippets only (< 1 KB together, plan P1.T5).
-  OpenGraph and JSON-LD are added in P2.T5.
 */
 import "../styles/global.css";
+import { getEntry } from "astro:content";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { pageJsonLd, serialiseJsonLd } from "../lib/seo";
 
 interface Props {
   title: string;
   description: string;
   noindex?: boolean;
+  /** Path under /og/ without extension; defaults to "index". Images come from src/pages/og/[slug].png.ts. */
+  ogSlug?: string;
 }
 
-const { title, description, noindex = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const { title, description, noindex = false, ogSlug = "index" } = Astro.props;
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site);
+const isHome = Astro.url.pathname === "/";
+const profile = (await getEntry("profile", "aditya"))!.data;
+const jsonLd = serialiseJsonLd(pageJsonLd(profile, site, { url: canonical, title, description, isHome }));
+const ogImage = new URL(`/og/${ogSlug}.png`, site);
 ---
 
 <!doctype html>
@@ -27,11 +35,26 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex" />}
+    <meta name="author" content={profile.name} />
+
+    <meta property="og:type" content={isHome ? "profile" : "website"} />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${title}: ${description}`} />
+    <meta name="twitter:card" content="summary_large_image" />
+
     <meta name="theme-color" content="#f2eee6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1a1d27" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preload" href="/fonts/piazzolla-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <script type="application/ld+json" set:html={jsonLd} />
     <script is:inline>
       // Theme before first paint: ?theme= wins, then the saved choice, else the OS.
       (function () {

@@ -1,0 +1,44 @@
+---
+title: A calibrated weather model, judged by its forecasts
+order: 4
+kind: personal
+status: draft
+period: 2026
+summary: Probabilistic daily-high forecasts for US cities, trained on CRPS and promoted to live only through pre-registered, leakage-safe tests.
+stack: [Python, CRPS, NWP and AI weather models, walk-forward backtesting, block bootstrap]
+headline_metrics: [kalshi-cities]
+diagram: kalshi
+interactive: kalshi-reliability
+what_i_got_wrong:
+  # Aditya: three short answers, 120 words in total. Then set status: published.
+  - prompt: believed       # Something you believed that turned out to be false.
+    answer: ""
+  - prompt: measure-first  # What you would measure first if you rebuilt it.
+    answer: ""
+  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
+    answer: ""
+---
+
+{/* Draft from the résumé (Oct 2026). Disclosure rule (plan §4): method and forecast quality only.
+    Never profit, positions, trade sizes, or per-city / per-day detail. Calibration numbers arrive
+    with the live feed in phase 7; the résumé's ECE figure is not shown. */}
+
+This page reports how good the forecasts are and how the model is tested. It does not report profit, positions or trade sizes.
+
+## Why it mattered
+
+Kalshi lists CFTC-regulated contracts on each day's high temperature in <Metric id="kalshi-cities" /> US cities. A forecast is only useful there if its probabilities are calibrated: a bracket priced at thirty per cent should happen about that often.
+
+## Problem
+
+{/* TODO(Aditya): why raw weather-model output is not calibrated bracket probabilities. */}
+
+## Approach
+
+A model trained on CRPS blends several national numerical weather prediction models and AI weather models into calibrated probabilities for each temperature bracket. Positions are sized with fractional Kelly and capped per cluster of correlated cities.
+
+Every model change is decided by a pre-registered, leakage-safe walk-forward backtest with block-bootstrap confidence intervals. A statistical gate decides when a shadow model is promoted to live, and execution fails closed: it reconciles every order with the exchange and stops on any mismatch.
+
+## Result
+
+{/* Phase 7: the live reliability diagram and skill scores against named baselines go here. */}

@@ -34,6 +34,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Type check
         run: pnpm check
+      - name: Unit tests
+        run: pnpm test:unit
+      - name: No literal numbers in case studies
+        run: pnpm check:numbers
+      - name: Résumé PDF matches the metrics registry
+        run: pnpm check:resume
       - name: Build
         run: pnpm build
       - name: Validate HTML

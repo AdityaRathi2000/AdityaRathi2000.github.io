@@ -1,0 +1,42 @@
+---
+title: An education classifier over hundreds of millions of records
+order: 3
+kind: production
+status: draft
+period: 2023 to present
+summary: Domain-specialised models that classify education records across taxonomies, hold back the cases they are unsure about, and retrain when their inputs drift.
+stack: [PyTorch, Hugging Face Transformers, selective prediction, CI/CD, drift monitoring]
+headline_metrics: [edu-records, edu-accuracy, edu-coverage, edu-taft-f1-lift]
+diagram: classifier
+interactive: null
+what_i_got_wrong:
+  # Aditya: three short answers, 120 words in total. Then set status: published.
+  - prompt: believed       # Something you believed that turned out to be false.
+    answer: ""
+  - prompt: measure-first  # What you would measure first if you rebuilt it.
+    answer: ""
+  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
+    answer: ""
+---
+
+{/* Draft from the résumé (Oct 2026). */}
+
+## Why it mattered
+
+{/* TODO(Aditya): who consumes these labels and what decision they feed. */}
+
+## Problem
+
+<Metric id="edu-records" /> unlabelled education records, spread across university, K-12 and international taxonomies.
+
+## Constraints
+
+{/* TODO(Aditya): no labels at the start; how the holdout was built; cost per million records. */}
+
+## Approach
+
+Domain-specialised models, one per taxonomy, with selective prediction: each model answers only when it is confident enough and holds the rest back. Task-adaptive fine-tuning replaced a frozen encoder. The models ship through CI/CD, and drift in the incoming records triggers retraining.
+
+## Result
+
+On the <Metric id="edu-us-slice" /> US slice the models reach <Metric id="edu-accuracy" /> accuracy at <Metric id="edu-coverage" /> coverage. Task-adaptive fine-tuning added <Metric id="edu-taft-f1-lift" /> F1 over the frozen encoder.

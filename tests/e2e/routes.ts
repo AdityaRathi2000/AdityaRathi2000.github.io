@@ -3,6 +3,7 @@ export const ROUTES = [
   { path: "/", name: "home" },
   { path: "/colophon/", name: "colophon" },
   { path: "/tiles/", name: "tile" },
+  { path: "/resume/", name: "resume" },
 ] as const;
 
 export const VIEWPORTS = [390, 1024, 1440] as const;
