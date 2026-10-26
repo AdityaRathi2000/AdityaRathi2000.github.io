@@ -1,0 +1,10 @@
+org: Sophos AI Research
+title: Data Science Intern
+kind: internship
+start: 2022-06
+end: 2022-12
+location: Philadelphia, PA
+summary: >-
+  Added learned text representations of command lines and file paths to a cybersecurity
+  alert-prioritisation system that had used only numerical and temporal signals; shipped to production.
+metrics: [sophos-auc-lift, sophos-alerts, sophos-sensors, sophos-queue-time, sophos-fp-suppressed, sophos-detection]

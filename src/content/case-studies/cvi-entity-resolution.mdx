@@ -1,0 +1,51 @@
+---
+title: Credential Value Index, entity resolution across sources
+order: 1
+kind: production
+status: draft
+period: 2023 to present
+summary: Turning provider records from many sources into one canonical list for a public index of non-degree credentials that states use to fund programmes.
+stack: [Python, FAISS, LLM adjudication, graph clustering, grounded search]
+headline_metrics: [cvi-sources, cvi-canonical-growth, cvi-descriptions, cvi-residual-recovery]
+diagram: cvi-funnel
+interactive: er-funnel
+what_i_got_wrong:
+  # Aditya: three short answers, 120 words in total. Then set status: published.
+  - prompt: believed       # Something you believed that turned out to be false.
+    answer: ""
+  - prompt: measure-first  # What you would measure first if you rebuilt it.
+    answer: ""
+  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
+    answer: ""
+---
+
+{/* Draft from the résumé (Oct 2026). Every number is a <Metric>; drafts render as "number pending". */}
+
+## Why it mattered
+
+The [Credential Value Index](https://credentialvalueindex.org) is one of the most comprehensive public indices of non-degree credentials. States use it to judge programmes; Idaho has used it to assess programmes for LAUNCH grant funding. Every credential has to be tied to the provider that offers it, and providers arrive from each source under their own names.
+
+## Problem
+
+The same provider appears across <Metric id="cvi-sources" /> sources with different names and details. Comparing every record with every other does not scale, and no single similarity score separates a near-duplicate from a different organisation with a similar name.
+
+{/* TODO(Aditya): one or two concrete failure cases from the real data (described, no data shown). */}
+
+## Constraints
+
+{/* TODO(Aditya): what limited the design: budget per LLM call, refresh cadence, review capacity, what BGI can publish. */}
+
+## Approach
+
+Four stages, each narrowing the work for the next:
+
+1. **Blocking** keeps comparisons among records that share a key.
+2. **Embedding similarity** with FAISS proposes candidate pairs inside each block.
+3. **LLM adjudication** decides the candidate pairs.
+4. **Graph clustering** turns accepted pairs into canonical providers.
+
+A separate LLM cascade writes a description for each provider; the hardest residuals go to a final tier that uses grounded search.
+
+## Result
+
+Canonical providers grew <Metric id="cvi-canonical-growth" /> year over year. The cascade generated <Metric id="cvi-descriptions" /> provider descriptions and recovered <Metric id="cvi-residual-recovery" /> of the hardest residuals with grounded search.

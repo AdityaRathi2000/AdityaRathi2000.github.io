@@ -1,0 +1,47 @@
+---
+/*
+  Margin note for one metric: what it measures, against what, on how much data, as of when.
+  Rendered as <details class="margin-note">: a footnote below 1200px, a margin note above
+  (see .margin-note in global.css). Must sit beside the paragraph, not inside it.
+  A draft's `needs` text is guidance for Aditya and is never shown to visitors.
+*/
+import { getEntry } from "astro:content";
+import { formatAsOf, formatValue } from "../lib/metrics";
+
+interface Props {
+  id: string;
+}
+
+const { id } = Astro.props;
+const entry = await getEntry("metrics", id);
+if (!entry) throw new Error(`<MetricNote id="${id}">: no such row in src/content/metrics/metrics.yaml`);
+const m = entry.data;
+const ci = m.evidence?.ci ? `${formatValue({ value: m.evidence.ci[0], unit: m.unit })} to ${formatValue({ value: m.evidence.ci[1], unit: m.unit })}` : null;
+---
+
+<details class="margin-note" data-metric-note={id}>
+  <summary>About this number</summary>
+  {
+    m.status === "draft" ? (
+      <p>This number is still being documented. Its comparison and sample size will appear here.</p>
+    ) : (
+      <p>
+        {m.scope}.
+        {m.baseline && (
+          <>
+            {" "}Compared with {m.baseline.label}: <span class="num">{formatValue({ value: m.baseline.value, unit: m.unit })}</span>.
+          </>
+        )}
+        {m.evidence?.n && (
+          <>
+            {" "}<i>n</i> = <span class="num">{m.evidence.n.toLocaleString("en-US")}</span>
+            {ci && <>, interval <span class="num">{ci}</span>{m.evidence.ci_method && ` (${m.evidence.ci_method})`}</>}.
+          </>
+        )}
+        {m.evidence?.split && <> {m.evidence.split}.</>}
+        {m.caveat && <> {m.caveat}</>}
+        {" "}As of {formatAsOf(m.as_of)}.
+      </p>
+    )
+  }
+</details>

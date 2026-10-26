@@ -1,0 +1,36 @@
+# Profile: the source for the hero, contact block, JSON-LD and llms.txt (plan P2.T5).
+aditya:
+  name: Aditya Rathi
+  job_title: Machine Learning Engineer
+  employer:
+    name: Burning Glass Institute
+    url: https://www.burningglassinstitute.org
+  location:
+    city: New York
+    region: NY
+    country: US
+  # Hero copy, 60 words at most. "First engineering hire / tech lead" stays out until
+  # pending_claims below is backed (team size, reviewers, named external users).
+  positioning: >-
+    I build the machine learning behind the Credential Value Index: domain-adapted encoders,
+    entity resolution across twenty data sources, and classifiers over hundreds of millions
+    of records, shipped with CI/CD and drift-triggered retraining. Below are five systems,
+    each with its baseline and what I got wrong.
+  email: aditya.rathi2000@gmail.com
+  phone: "(215) 930-6153"
+  links:
+    github: https://github.com/AdityaRathi2000
+    linkedin: https://www.linkedin.com/in/aditya-rathi
+    huggingface: https://huggingface.co/AdityaRathi
+  education:
+    - school: University of Pennsylvania
+      degree: M.S.E., Data Science
+      year: 2023
+    - school: University of Pennsylvania
+      degree: B.S.E., Electrical Engineering
+      honors: Summa cum laude
+      year: 2023
+  pending_claims:
+    - >-
+      First engineering hire and tech lead at Burning Glass Institute. Needs: team size,
+      who reviews the work, and named external users of the outputs (Aditya to fill).

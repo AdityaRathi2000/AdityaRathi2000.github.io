@@ -1,0 +1,51 @@
+# Skills, each tied to the work that shows it (plan P2.T2). A skill with no evidence fails the build.
+# case_studies: slugs in src/content/case-studies/; roles: file names in src/content/roles/.
+- id: entity-resolution
+  label: Entity resolution (blocking, embedding similarity, LLM adjudication, graph clustering)
+  case_studies: [cvi-entity-resolution]
+- id: retrieval
+  label: Embeddings and FAISS similarity search
+  case_studies: [cvi-entity-resolution]
+- id: llm-cascades
+  label: LLM cascades with grounded search
+  case_studies: [cvi-entity-resolution, postings-extraction-stack]
+- id: llm-evaluation
+  label: LLM-as-judge evaluation
+  case_studies: [postings-extraction-stack]
+- id: domain-adaptive-pretraining
+  label: Domain-adaptive pretraining and encoder selection
+  case_studies: [postings-extraction-stack]
+- id: ner
+  label: Named-entity recognition and weak supervision
+  case_studies: [postings-extraction-stack]
+- id: inference-optimisation
+  label: Inference optimisation (FP8, FlashAttention-2, minimal-padding batching)
+  case_studies: [postings-extraction-stack]
+- id: text-classification
+  label: Text classification and selective prediction
+  case_studies: [education-classifier]
+  roles: [sophos]
+- id: mlops
+  label: CI/CD, drift monitoring and automated retraining
+  case_studies: [education-classifier]
+- id: pytorch
+  label: PyTorch and Hugging Face Transformers
+  case_studies: [postings-extraction-stack, education-classifier]
+- id: probabilistic-forecasting
+  label: Probabilistic forecasting and calibration (CRPS)
+  case_studies: [kalshi-weather-model]
+- id: backtesting
+  label: Leakage-safe walk-forward backtesting
+  case_studies: [kalshi-weather-model]
+- id: model-serving
+  label: Model serving on AWS SageMaker
+  case_studies: [manifold]
+- id: gradient-boosting
+  label: XGBoost and LightGBM
+  roles: [sophos]
+- id: signal-processing
+  label: Signal processing for biometric data
+  roles: [brainai]
+- id: data-platforms
+  label: SQL, PySpark and Snowflake
+  roles: [bgi]

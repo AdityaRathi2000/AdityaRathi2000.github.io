@@ -2,20 +2,13 @@
 /*
   Chosen style tile (B, Piazzolla): hero row and one selected-systems row.
   Kept as the design reference for phase 4; it is not the home page.
-  Copy is a draft (hero ≤ 60 words, from the plan's §4 draft minus the claims flagged
-  as needing support). Numbers are the résumé's own and are marked as a specimen until
-  the metrics registry exists (P2.T1).
+  Numbers come from the metrics registry through <Metric>; draft rows show "pending".
 */
+import Metric from "../Metric.astro";
+import MetricNote from "../MetricNote.astro";
 import ErSketch from "./ErSketch.astro";
 import RiskCoverageThumb from "./RiskCoverageThumb.astro";
 
-// Specimen values: résumé figures, typed once here until src/content/metrics exists.
-const specimen = {
-  accuracy: "93%",
-  coverage: "94%",
-  scored: "165M",
-  records: "600M",
-};
 ---
 
   <section class="hero" aria-labelledby="hero-name">
@@ -50,24 +43,18 @@ const specimen = {
         <RiskCoverageThumb />
       </div>
       <div class="system-body">
-        <h3 id="row-classifier">An education classifier over <span class="num">{specimen.records}</span> records</h3>
+        <h3 id="row-classifier">An education classifier over <Metric id="edu-records" bare /> records</h3>
         <p>
           A multi-domain classifier that holds back the cases it is unsure about and retrains when its inputs drift.
         </p>
         <p class="metric">
-          <span class="num">{specimen.accuracy}</span> accuracy at <span class="num">{specimen.coverage}</span> coverage on
-          the <span class="nowrap"><span class="num">{specimen.scored}</span>-record</span> US slice.
+          <Metric id="edu-accuracy" /> accuracy at <Metric id="edu-coverage" /> coverage on the
+          <Metric id="edu-us-slice" /> US slice.
         </p>
         <p><a href="#work">Read the case study</a></p>
       </div>
-      <details class="margin-note">
-        <summary>Baseline and sample size</summary>
-        <p>
-          Comparator and holdout size pending. The <span class="num">{specimen.scored}</span> figure is the scored population,
-          not the evaluation set; the holdout <i>n</i> and a 95% interval come from the numbers worksheet in phase 2.
-        </p>
-      </details>
-      <p class="specimen-tag">Specimen row: résumé figures, comparator pending.</p>
+      <MetricNote id="edu-accuracy" />
+      <p class="specimen-tag">Specimen row: numbers marked pending are drafts in the registry.</p>
     </article>
   </section>
 

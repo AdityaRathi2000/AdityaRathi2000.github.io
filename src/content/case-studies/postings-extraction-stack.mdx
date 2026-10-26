@@ -1,0 +1,48 @@
+---
+title: Postings extraction stack, from pretraining to shipped predictions
+order: 2
+kind: production
+status: draft
+period: 2023 to present
+summary: Domain-adapted encoders and a tiered extraction cascade that cut job postings into sections and feed downstream classifiers.
+stack: [PyTorch, Hugging Face Transformers, ModernBERT, FP8, FlashAttention-2, LLM-as-judge]
+headline_metrics: [dapt-encoders, ner-section-types, ner-f1, edu-predictions]
+diagram: postings-stack
+interactive: ner-walkthrough
+what_i_got_wrong:
+  # Aditya: three short answers, 120 words in total. Then set status: published.
+  - prompt: believed       # Something you believed that turned out to be false.
+    answer: ""
+  - prompt: measure-first  # What you would measure first if you rebuilt it.
+    answer: ""
+  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
+    answer: ""
+---
+
+{/* Draft from the résumé (Oct 2026). TODO(Aditya): confirm the period start year in the frontmatter. */}
+
+## Why it mattered
+
+Job postings are long and inconsistent, and what a job asks for (education, experience, skills, certifications) is buried inside them. Downstream classifiers need those sections cut out first.
+
+## Problem
+
+{/* TODO(Aditya): why off-the-shelf encoders or a single LLM pass were not enough (cost, accuracy, scale). */}
+
+## Constraints
+
+{/* TODO(Aditya): GPU budget, throughput target, labelling budget, what can be published. */}
+
+## Approach
+
+**Pretraining.** Domain-adaptive pretraining across <Metric id="dapt-encoders" /> encoder architectures, run by an agent-driven experiment loop with automated hyperparameter search. Models were compared on bits-per-byte, which does not depend on the tokenizer. The selected ModernBERT checkpoint is the backbone of the stack.
+
+**Serving.** FP8 quantisation, FlashAttention-2 and minimal-padding batching on RTX 5090s.
+
+**Extraction.** A tiered cascade. A fine-tuned ModernBERT NER model segments each posting into <Metric id="ner-section-types" /> section types (education, experience, skills, certifications, responsibilities and more), which feed several downstream classifiers. Its labels were distilled from an LLM over a weak-supervision-stratified sample and audited by interns; it reaches <Metric id="ner-f1" /> against the gold set.
+
+{/* TODO(Aditya): name the tiers in order (rules, encoder, LLM residual?) and what routes a span to the next tier. */}
+
+## Result
+
+<Metric id="edu-predictions" /> education predictions shipped, validated by an LLM acting as judge.

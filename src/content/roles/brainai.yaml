@@ -1,0 +1,9 @@
+org: University of Pennsylvania
+title: BrainAI, EEG/ECG biometric identification (course project)
+kind: project
+start: 2022
+end: 2022
+summary: >-
+  Closed-set identification from EEG and ECG signals: bandpass, FFT, wavelet and PSD features;
+  logistic regression, feed-forward and LSTM models; session-level stratified cross-validation.
+metrics: [brainai-subjects, brainai-f1]

@@ -1,0 +1,22 @@
+---
+// /resume sends visitors to the hand-maintained PDF (plan P2.T4).
+// scripts/check-resume.mjs keeps the PDF's numbers in sync with metrics.yaml.
+import "../styles/global.css";
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content="0; url=/resume.pdf" />
+    <link rel="canonical" href={new URL("/resume.pdf", Astro.site)} />
+    <title>Résumé, Aditya Rathi</title>
+  </head>
+  <body>
+    <main class="frame measure" style="padding-block: 4rem;">
+      <p>Opening the résumé. If nothing happens, <a href="/resume.pdf">open the PDF</a>.</p>
+    </main>
+  </body>
+</html>
