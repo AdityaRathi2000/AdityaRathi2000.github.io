@@ -18,7 +18,7 @@
     "test:e2e": "playwright test",
     "lhci": "lhci autorun",
     "verify": "pnpm check && pnpm test:unit && pnpm check:numbers && pnpm check:resume && pnpm build && pnpm validate:html && pnpm budgets && pnpm test:e2e",
-    "test:unit": "node --test tests/unit/",
+    "test:unit": "node --test \"tests/unit/*.test.ts\"",
     "check:numbers": "node scripts/check-no-literal-numbers.mjs",
     "check:resume": "node scripts/check-resume.mjs"
   },
