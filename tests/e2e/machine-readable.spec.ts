@@ -1,5 +1,11 @@
 // P2.T4/P2.T5 behaviour: résumé route, JSON-LD, OpenGraph image, llms.txt, resume.md.
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
+import { parse } from "yaml";
+import { formatValue, type MetricValue } from "../../src/lib/metrics.ts";
+
+type Row = MetricValue & { id: string; status: "ready" | "draft" };
+const drafts = (parse(readFileSync("src/content/metrics/metrics.yaml", "utf8")) as Row[]).filter((m) => m.status === "draft");
 
 test("/resume points at the PDF, which is served", async ({ page, request }) => {
   await page.goto("/resume/");
@@ -36,9 +42,11 @@ test("llms.txt and resume.md are served and never show a draft number", async ({
   expect(llms).not.toMatch(/\bBelow\b/);
   const md = await (await request.get("/resume.md")).text();
   expect(md).toContain("Machine Learning Engineer");
-  // Draft rows in metrics.yaml (e.g. ~35% YoY, 93% accuracy, 16% AUC lift) must not leak.
-  for (const draft of ["35%", "93%", "16%", "77%", "88%"]) {
-    expect(llms).not.toContain(draft);
-    expect(md).not.toContain(draft);
+  // No draft row in metrics.yaml may leak its value. Read from the registry, so a row that
+  // becomes ready is allowed through and a new draft is covered without editing this test.
+  for (const m of drafts) {
+    const shown = formatValue({ value: m.value, unit: m.unit });
+    expect(llms, m.id).not.toContain(shown);
+    expect(md, m.id).not.toContain(shown);
   }
 });

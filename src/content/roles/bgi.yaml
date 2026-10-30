@@ -5,6 +5,7 @@ start: 2023-06
 end: null
 location: New York, NY
 summary: >-
-  The machine learning behind the Credential Value Index: entity resolution, a postings
-  extraction stack, and education classifiers over hundreds of millions of records.
+  First engineering hire, and tech lead for the education, credential, location, experience
+  and wage pipelines and for matching projects. I build the machine learning behind the
+  Credential Value Index.
 metrics: [cvi-sources, edu-records, edu-predictions]

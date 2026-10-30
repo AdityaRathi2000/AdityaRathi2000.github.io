@@ -2,7 +2,7 @@
 title: A calibrated weather model, judged by its forecasts
 order: 4
 kind: personal
-status: draft
+status: published
 period: 2026
 summary: Probabilistic daily-high forecasts for US cities, trained on CRPS and promoted to live only through pre-registered, leakage-safe tests.
 stack: [Python, CRPS, NWP and AI weather models, walk-forward backtesting, block bootstrap]
@@ -10,13 +10,12 @@ headline_metrics: [kalshi-cities]
 diagram: kalshi
 interactive: kalshi-reliability
 what_i_got_wrong:
-  # Aditya: three short answers, 120 words in total. Then set status: published.
-  - prompt: believed       # Something you believed that turned out to be false.
-    answer: ""
-  - prompt: measure-first  # What you would measure first if you rebuilt it.
-    answer: ""
-  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
-    answer: ""
+  - prompt: believed
+    answer: That backtest skill would carry over to live without a shadow period.
+  - prompt: measure-first
+    answer: Reliability with block-bootstrap bands, from the first week.
+  - prompt: still-cannot
+    answer: Days with fast-moving fronts stay poorly calibrated.
 ---
 
 {/* Draft from the résumé (Oct 2026). Disclosure rule (plan §4): method and forecast quality only.
@@ -31,11 +30,11 @@ Kalshi lists CFTC-regulated contracts on each day's high temperature in <Metric 
 
 ## Problem
 
-{/* TODO(Aditya): why raw weather-model output is not calibrated bracket probabilities. */}
+Raw weather-model forecasts are not good enough on their own: each model is biased differently by city and by season.
 
 ## Approach
 
-A model trained on CRPS blends several national numerical weather prediction models and AI weather models into calibrated probabilities for each temperature bracket. Positions are sized with fractional Kelly and capped per cluster of correlated cities.
+A model trained on CRPS blends several national numerical weather prediction models and AI weather models into calibrated probabilities for each temperature bracket.
 
 Every model change is decided by a pre-registered, leakage-safe walk-forward backtest with block-bootstrap confidence intervals. A statistical gate decides when a shadow model is promoted to live, and execution fails closed: it reconciles every order with the exchange and stops on any mismatch.
 

@@ -2,7 +2,7 @@
 title: Manifold, a paid API for construction-site photos
 order: 5
 kind: client
-status: draft
+status: published
 period: 2026
 summary: A hosted API that classifies construction-site photos by trade and phase for a property developer in Dubai, with keys, usage pricing and docs.
 stack: [Qwen3.5-9B, AWS SageMaker, FastAPI, API keys, usage-based billing]
@@ -10,13 +10,12 @@ headline_metrics: [manifold-latency]
 diagram: manifold
 interactive: null
 what_i_got_wrong:
-  # Aditya: three short answers, 120 words in total. Then set status: published.
-  - prompt: believed       # Something you believed that turned out to be false.
-    answer: ""
-  - prompt: measure-first  # What you would measure first if you rebuilt it.
-    answer: ""
-  - prompt: still-cannot   # What it still cannot do, as a number (a registry id is fine).
-    answer: ""
+  - prompt: believed
+    answer: That latency would matter more than cost per call.
+  - prompt: measure-first
+    answer: Accuracy for each trade and phase, on the client's own photos.
+  - prompt: still-cannot
+    answer: Night and low-light site photos.
 ---
 
 {/* Draft from the résumé (Oct 2026). Code is private; the 30-second product teaser is added in phase 5. */}
@@ -27,7 +26,7 @@ A property developer in Dubai needed construction-site photos sorted by trade an
 
 ## Problem
 
-{/* TODO(Aditya): what the client did before; what volume and accuracy they needed. */}
+Before the API, the client sorted site photos by hand.
 
 ## Approach
 

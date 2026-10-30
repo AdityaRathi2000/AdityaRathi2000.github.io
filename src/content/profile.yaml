@@ -9,13 +9,17 @@ aditya:
     city: New York
     region: NY
     country: US
-  # Hero copy, 60 words at most. "First engineering hire / tech lead" stays out until
-  # pending_claims below is backed (team size, reviewers, named external users).
+  # Hero copy, 60 words at most. "First engineering hire" and "tech lead" are backed by
+  # Aditya's answers (2026-10-30): a team of seven or more; tech lead for the education,
+  # credential, location, years-of-experience and wage pipelines and for matching projects;
+  # interns report to him; reviewed by the research director and economists; outputs used by
+  # state agencies (Idaho, LAUNCH grants), researchers, partner organisations and the public index.
   positioning: >-
-    I build the machine learning behind the Credential Value Index: domain-adapted encoders,
-    entity resolution across twenty data sources, and classifiers over hundreds of millions
-    of records, shipped with CI/CD and drift-triggered retraining. Below are five systems,
-    each with its baseline and what I got wrong.
+    I'm the first engineering hire at the Burning Glass Institute and tech lead for its
+    matching, education, credential, location, experience and wage pipelines. I build the machine
+    learning behind the Credential Value Index: entity resolution across twenty data sources
+    and classifiers over hundreds of millions of records. Below are five systems, each with
+    its baseline and what I got wrong.
   email: aditya.rathi2000@gmail.com
   phone: "(215) 930-6153"
   links:
@@ -30,7 +34,3 @@ aditya:
       degree: B.S.E., Electrical Engineering
       honors: Summa cum laude
       year: 2023
-  pending_claims:
-    - >-
-      First engineering hire and tech lead at Burning Glass Institute. Needs: team size,
-      who reviews the work, and named external users of the outputs (Aditya to fill).
