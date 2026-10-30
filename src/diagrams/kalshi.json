@@ -1,0 +1,25 @@
+{
+  "title": "How the weather model is built and judged",
+  "desc": "Numerical weather prediction models and AI weather models feed a blend trained on CRPS, which gives a probability for each daily-high temperature bracket. When the day settles, the outcome scores the forecasts for calibration and CRPS. A model change goes live only after pre-registered, leakage-safe walk-forward backtests and a statistical gate on a shadow model.",
+  "caption": "Forecast quality and the tests a change must pass. No trading figures are shown.",
+  "seed": 3004,
+  "columns": 2,
+  "rows": [
+    [
+      { "id": "nwp", "label": "Numerical weather prediction", "sub": "several national models", "col": 0 },
+      { "id": "ai", "label": "AI weather models", "col": 1 }
+    ],
+    [{ "id": "blend", "label": "Blend trained on CRPS", "sub": "each source is biased its own way by city and season", "tone": "accent" }],
+    [{ "id": "brackets", "label": "Bracket probabilities", "sub": "a probability for each daily-high bracket", "metric": "kalshi-cities" }],
+    [{ "id": "scoring", "label": "Settled days score the forecasts", "sub": "calibration and CRPS" }],
+    [{ "id": "gate", "label": "Statistical gate", "sub": "a change goes live only after pre-registered, leakage-safe walk-forward backtests and a shadow period" }]
+  ],
+  "edges": [
+    { "from": "nwp", "to": "blend" },
+    { "from": "ai", "to": "blend" },
+    { "from": "blend", "to": "brackets" },
+    { "from": "brackets", "to": "scoring" },
+    { "from": "scoring", "to": "gate" },
+    { "from": "gate", "to": "blend", "label": "promotes a new blend", "dash": true }
+  ]
+}

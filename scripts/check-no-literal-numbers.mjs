@@ -1,8 +1,10 @@
-// Fails when a number appears in case-study prose outside <Metric> (plan §4, veto V1).
-// Usage: node scripts/check-no-literal-numbers.mjs [dir ...]   (default: src/content/case-studies)
+// Fails when a number appears in case-study prose outside <Metric> (plan §4, veto V1), or in the
+// text of a diagram spec, where numbers come only from a node's `metric` binding.
+// Usage: node scripts/check-no-literal-numbers.mjs [dir ...]   (default: src/content/case-studies src/diagrams)
 //
 // Checked: the MDX body, plus the frontmatter fields shown to readers (title, summary,
-// what_i_got_wrong[].answer).
+// what_i_got_wrong[].answer); in diagram specs (*.json), every string except the ids and
+// metric references (keys: id, from, to, metric).
 // Ignored: JSX/HTML tags (so <Metric id="..."/> passes), MDX comments, code, link URLs,
 // ordered-list markers, four-digit years, and tokens that are part of a name
 // (FP8, K-12, RTX 5090s, Qwen3.5-9B, FlashAttention-2).
@@ -11,7 +13,7 @@ import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 
 const dirs = process.argv.slice(2);
-const targets = dirs.length ? dirs : ["src/content/case-studies"];
+const targets = dirs.length ? dirs : ["src/content/case-studies", "src/diagrams"];
 
 // Blank out a region but keep newlines, so reported line numbers stay true.
 const blank = (s) => s.replace(/[^\n]/g, " ");
@@ -47,7 +49,25 @@ function findings(text, file, lineOffset) {
 
 const problems = [];
 let files = 0;
+// Diagram specs: walk every string, keeping its JSON path for the report.
+const NOT_TEXT = new Set(["id", "from", "to", "metric"]);
+function jsonStrings(value, path, out) {
+  if (typeof value === "string") out.push([path, value]);
+  else if (Array.isArray(value)) value.forEach((v, i) => jsonStrings(v, `${path}[${i}]`, out));
+  else if (value && typeof value === "object") {
+    for (const [k, v] of Object.entries(value)) if (!NOT_TEXT.has(k)) jsonStrings(v, path ? `${path}.${k}` : k, out);
+  }
+  return out;
+}
+
 for (const dir of targets) {
+  for (const name of readdirSync(dir).filter((n) => n.endsWith(".json"))) {
+    files++;
+    const file = join(dir, name);
+    for (const [path, text] of jsonStrings(JSON.parse(readFileSync(file, "utf8")), "", [])) {
+      problems.push(...findings(text, `${file} (${path})`, 0));
+    }
+  }
   for (const name of readdirSync(dir).filter((n) => n.endsWith(".mdx") || n.endsWith(".md"))) {
     files++;
     const file = join(dir, name);

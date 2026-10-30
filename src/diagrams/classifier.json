@@ -1,0 +1,25 @@
+{
+  "title": "How the education classifier answers, abstains and retrains",
+  "desc": "Unlabelled education records from university, K-12 and international taxonomies go to domain-specialised models that were fine-tuned task-adaptively and ship through CI/CD. Each model answers only the records it is confident about and holds the rest back. A drift monitor watches the incoming records and triggers retraining.",
+  "caption": "Selective prediction: the models answer what they are sure of and hold back the rest.",
+  "seed": 3003,
+  "columns": 2,
+  "rows": [
+    [{ "id": "records", "label": "Education records", "sub": "university, K-12 and international taxonomies", "metric": "edu-records" }],
+    [
+      { "id": "models", "label": "Domain-specialised models", "sub": "fine-tuned task-adaptively; shipped through CI/CD", "col": 0 },
+      { "id": "drift", "label": "Drift monitor", "sub": "watches the incoming records", "col": 1 }
+    ],
+    [
+      { "id": "answered", "label": "Answered", "sub": "the model is confident", "col": 0 },
+      { "id": "held", "label": "Held back", "sub": "too unsure to answer", "col": 1, "tone": "accent" }
+    ]
+  ],
+  "edges": [
+    { "from": "records", "to": "models" },
+    { "from": "records", "to": "drift" },
+    { "from": "drift", "to": "models", "label": "retrains" },
+    { "from": "models", "to": "answered" },
+    { "from": "models", "to": "held" }
+  ]
+}

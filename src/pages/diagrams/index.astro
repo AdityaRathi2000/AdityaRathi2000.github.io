@@ -1,0 +1,71 @@
+---
+/*
+  Diagram specimens (P3): every architecture figure and row thumbnail on one page, so the
+  e2e suite can screenshot, measure and scan them before the home page (P4) and the
+  case-study pages (P5) place them. Design reference only, like /tiles/.
+*/
+import Base from "../../layouts/Base.astro";
+import Diagram from "../../components/Diagram.astro";
+import CviThumb from "../../components/thumbs/CviThumb.astro";
+import KalshiThumb from "../../components/thumbs/KalshiThumb.astro";
+import ManifoldThumb from "../../components/thumbs/ManifoldThumb.astro";
+import PostingsThumb from "../../components/thumbs/PostingsThumb.astro";
+import RiskCoverageThumb from "../../components/thumbs/RiskCoverageThumb.astro";
+
+const figures = [
+  { name: "cvi-funnel", heading: "Credential Value Index" },
+  { name: "postings-stack", heading: "Postings extraction stack" },
+  { name: "classifier", heading: "Education classifier" },
+  { name: "kalshi", heading: "Weather model" },
+  { name: "manifold", heading: "Manifold" },
+];
+---
+
+<Base title="Diagram specimens" description="Architecture figures and row thumbnails for the adityarathi.com redesign." noindex>
+  <h1>Diagram specimens</h1>
+  <p class="lede">The five architecture figures and the five row thumbnails, as the case studies and the home page will use them.</p>
+
+  <h2>Row thumbnails</h2>
+  <ul class="thumbs" aria-label="Row thumbnails">
+    <li><CviThumb /></li>
+    <li><PostingsThumb /></li>
+    <li><RiskCoverageThumb /></li>
+    <li><KalshiThumb /></li>
+    <li><ManifoldThumb /></li>
+  </ul>
+
+  {
+    figures.map((f) => (
+      <section aria-labelledby={`h-${f.name}`}>
+        <h2 id={`h-${f.name}`}>{f.heading}</h2>
+        <Diagram name={f.name} />
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .lede {
+    color: var(--ink-2);
+    max-width: var(--measure);
+  }
+
+  h2 {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-s);
+  }
+
+  .thumbs {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--space-s);
+  }
+
+  .thumbs :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

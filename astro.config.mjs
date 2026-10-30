@@ -12,8 +12,8 @@ export default defineConfig({
     expressiveCode(),
     mdx(),
     sitemap({
-      // Style tiles are a design gate, not content.
-      filter: (page) => !page.includes("/tiles/"),
+      // Style tiles and diagram specimens are design references (noindex), not content.
+      filter: (page) => !page.includes("/tiles/") && !page.includes("/diagrams/"),
     }),
   ],
 });
