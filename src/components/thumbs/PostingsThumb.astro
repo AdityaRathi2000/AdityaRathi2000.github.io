@@ -1,0 +1,31 @@
+---
+/*
+  Row thumbnail for the postings stack: a job posting whose lines are cut into sections,
+  one section highlighted. A pictogram of the mechanism; it shows no data.
+*/
+import { sketch } from "../../lib/rough";
+import RoughPaths from "../RoughPaths.astro";
+
+const s = sketch(3102);
+
+const page = s.rect(32, 12, 124, 140, { width: 1.2 });
+const ys = [28, 38, 48, 66, 76, 86, 96, 114, 124, 134];
+const widths = [92, 78, 86, 96, 70, 88, 60, 90, 82, 54];
+const text = ys.flatMap((y, i) => s.line(46, y, 46 + widths[i], y, { tone: "muted", width: 1, roughness: 0.6 }));
+const sections = [
+  ...s.rect(40, 21, 108, 34, { hachure: true, width: 0.9, roughness: 0.7, tone: "muted" }),
+  ...s.rect(40, 59, 108, 44, { tone: "accent", width: 1.7, roughness: 0.7 }),
+  ...s.rect(40, 107, 108, 34, { hachure: true, width: 0.9, roughness: 0.7, tone: "muted" }),
+];
+const frame = s.rect(4, 2, 220, 158, { width: 1.1, roughness: 0.9 });
+---
+
+<svg class="rough thumb" viewBox="0 0 228 164" role="img" aria-labelledby="postings-thumb-title">
+  <title id="postings-thumb-title">Sketch of a job posting cut into sections, with one section highlighted</title>
+  <RoughPaths paths={frame} />
+  <rect class="r-solid" x="32" y="12" width="124" height="140" />
+  <RoughPaths paths={page} />
+  <RoughPaths paths={sections} />
+  <RoughPaths paths={text} />
+  <text class="r-note" x="164" y="86" font-size="15">section</text>
+</svg>

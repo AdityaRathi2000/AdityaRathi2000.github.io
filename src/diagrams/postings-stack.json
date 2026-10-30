@@ -1,0 +1,26 @@
+{
+  "title": "How job postings become education predictions",
+  "desc": "Job postings pass through an extraction cascade in three tiers: rules first, then a fine-tuned NER encoder, then an LLM for what the first two leave. The encoder is a student distilled from an LLM teacher, built on a ModernBERT backbone that was chosen by domain-adaptive pretraining and is served with FP8 and FlashAttention-2 on RTX 5090s. The extracted sections feed downstream classifiers, whose education predictions are checked by an LLM acting as judge.",
+  "caption": "The postings extraction stack: a three-tier cascade on a domain-adapted backbone.",
+  "seed": 3002,
+  "columns": 2,
+  "rows": [
+    [{ "id": "postings", "label": "Job postings", "sub": "long and inconsistent", "col": 0 }],
+    [{ "id": "rules", "label": "Rules", "sub": "tier one", "col": 0 }],
+    [
+      { "id": "encoder", "label": "Fine-tuned NER encoder", "sub": "tier two; a student distilled from an LLM teacher", "metric": "ner-section-types", "col": 0, "tone": "accent" },
+      { "id": "backbone", "label": "ModernBERT backbone", "sub": "picked by domain-adaptive pretraining; FP8 and FlashAttention-2 on RTX 5090s", "metric": "dapt-encoders", "col": 1 }
+    ],
+    [{ "id": "llm", "label": "LLM", "sub": "tier three, for what the first two leave", "col": 0 }],
+    [{ "id": "classifiers", "label": "Downstream classifiers", "sub": "read the extracted sections", "col": 0 }],
+    [{ "id": "predictions", "label": "Education predictions", "sub": "checked by an LLM acting as judge", "metric": "edu-predictions", "col": 0, "span": 2 }]
+  ],
+  "edges": [
+    { "from": "postings", "to": "rules" },
+    { "from": "rules", "to": "encoder", "label": "the rest" },
+    { "from": "backbone", "to": "encoder" },
+    { "from": "encoder", "to": "llm", "label": "the rest" },
+    { "from": "llm", "to": "classifiers" },
+    { "from": "classifiers", "to": "predictions" }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "How provider records become canonical providers",
+  "desc": "Provider records arrive from many sources under different names. Blocking keeps comparisons among records that share a key. Embedding similarity with FAISS proposes candidate pairs inside each block, an LLM decides each candidate pair, and graph clustering turns accepted pairs into canonical providers. A separate LLM cascade then writes a description for each provider, sending the hardest cases to grounded search.",
+  "caption": "The entity-resolution pipeline behind the Credential Value Index.",
+  "seed": 3001,
+  "columns": 2,
+  "rows": [
+    [{ "id": "sources", "label": "Provider records", "sub": "each source names providers its own way", "metric": "cvi-sources" }],
+    [{ "id": "blocking", "label": "Blocking", "sub": "compare only records that share a key, not every pair" }],
+    [{ "id": "similarity", "label": "Embedding similarity", "sub": "FAISS proposes candidate pairs inside each block" }],
+    [{ "id": "adjudication", "label": "LLM adjudication", "sub": "decides each candidate pair", "tone": "accent" }],
+    [{ "id": "clustering", "label": "Graph clustering", "sub": "accepted pairs join into one provider" }],
+    [
+      { "id": "canonical", "label": "Canonical providers", "metric": "cvi-providers", "col": 0 },
+      { "id": "descriptions", "label": "Provider descriptions", "sub": "an LLM cascade; the hardest go to grounded search", "metric": "cvi-descriptions", "col": 1 }
+    ]
+  ],
+  "edges": [
+    { "from": "sources", "to": "blocking" },
+    { "from": "blocking", "to": "similarity" },
+    { "from": "similarity", "to": "adjudication" },
+    { "from": "adjudication", "to": "clustering" },
+    { "from": "clustering", "to": "canonical" },
+    { "from": "canonical", "to": "descriptions" }
+  ]
+}

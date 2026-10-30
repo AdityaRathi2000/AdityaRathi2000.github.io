@@ -1,0 +1,36 @@
+---
+/*
+  Row thumbnail for Manifold: a site photo going in, a trade-and-phase tag coming out.
+  A pictogram of the API; the case-study page shows the real product teaser (P5).
+*/
+import { sketch } from "../../lib/rough";
+import RoughPaths from "../RoughPaths.astro";
+
+const s = sketch(3104);
+
+const photo = s.rect(18, 30, 104, 82, { width: 1.3 });
+const crane = [
+  ...s.line(50, 100, 50, 46, { width: 1.2 }),
+  ...s.line(42, 50, 104, 50, { width: 1.2 }),
+  ...s.line(92, 50, 92, 70, { tone: "muted", width: 1 }),
+  ...s.rect(86, 70, 12, 9, { width: 1, roughness: 0.6 }),
+  ...s.line(26, 100, 114, 100, { tone: "muted", width: 1 }),
+  ...s.rect(64, 82, 22, 18, { hachure: true, width: 1, roughness: 0.6 }),
+];
+const arrow = [...s.line(130, 71, 154, 71, { width: 1.2 }), ...s.path("M147 65 L155 71 L147 77", { width: 1.2, roughness: 0.5 })];
+const tag = s.path("M162 58 L198 58 L210 71 L198 84 L162 84 Z", { tone: "accent", width: 1.7, roughness: 0.7 });
+const hole = s.ellipse(198, 71, 5, 5, { width: 1, roughness: 0.4 });
+const frame = s.rect(4, 2, 220, 158, { width: 1.1, roughness: 0.9 });
+---
+
+<svg class="rough thumb" viewBox="0 0 228 164" role="img" aria-labelledby="manifold-thumb-title">
+  <title id="manifold-thumb-title">Sketch of a construction-site photo going into the API and coming out with a trade and phase tag</title>
+  <RoughPaths paths={frame} />
+  <rect class="r-solid" x="18" y="30" width="104" height="82" />
+  <RoughPaths paths={photo} />
+  <RoughPaths paths={crane} />
+  <RoughPaths paths={arrow} />
+  <RoughPaths paths={tag} />
+  <RoughPaths paths={hole} />
+  <text class="r-note" x="184" y="104" text-anchor="middle" font-size="15">trade, phase</text>
+</svg>

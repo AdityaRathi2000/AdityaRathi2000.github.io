@@ -1,0 +1,41 @@
+---
+/*
+  Row thumbnail for entity resolution: scattered records for one provider, linked and merged
+  into a single canonical card. A pictogram of the mechanism; it shows no data.
+*/
+import { sketch } from "../../lib/rough";
+import RoughPaths from "../RoughPaths.astro";
+
+const s = sketch(3101);
+
+const cards: [number, number, number][] = [
+  [18, 20, 58],
+  [70, 46, 50],
+  [14, 76, 64],
+  [62, 104, 54],
+  [22, 128, 46],
+];
+const centre = ([x, y, w]: [number, number, number]): [number, number] => [x + w / 2, y + 7];
+const records = cards.flatMap(([x, y, w]) => s.rect(x, y, w, 14, { width: 1 }));
+const links = [
+  ...s.line(...centre(cards[0]), ...centre(cards[1]), { tone: "muted", width: 0.9 }),
+  ...s.line(...centre(cards[1]), ...centre(cards[2]), { tone: "muted", width: 0.9 }),
+  ...s.line(...centre(cards[2]), ...centre(cards[3]), { tone: "muted", width: 0.9 }),
+  ...s.line(...centre(cards[3]), ...centre(cards[4]), { tone: "muted", width: 0.9 }),
+];
+const arrow = [...s.line(132, 82, 160, 82, { width: 1.2 }), ...s.path("M153 76 L161 82 L153 88", { width: 1.2, roughness: 0.5 })];
+const merged = s.rect(166, 66, 50, 32, { tone: "accent", width: 1.8, roughness: 0.8 });
+const frame = s.rect(4, 2, 220, 158, { width: 1.1, roughness: 0.9 });
+---
+
+<svg class="rough thumb" viewBox="0 0 228 164" role="img" aria-labelledby="cvi-thumb-title">
+  <title id="cvi-thumb-title">Sketch of several records for one provider, linked and merged into one canonical card</title>
+  <RoughPaths paths={frame} />
+  <RoughPaths paths={links} />
+  {cards.map(([x, y, w]) => <rect class="r-solid" x={x} y={y} width={w} height={14} />)}
+  <RoughPaths paths={records} />
+  <RoughPaths paths={arrow} />
+  <rect class="r-solid" x="166" y="66" width="50" height="32" />
+  <RoughPaths paths={merged} />
+  <text class="r-note" x="216" y="122" text-anchor="end" font-size="15">one provider</text>
+</svg>

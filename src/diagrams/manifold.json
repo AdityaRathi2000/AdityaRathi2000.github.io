@@ -1,0 +1,17 @@
+{
+  "title": "How a construction-site photo gets its label",
+  "desc": "The client uploads a construction-site photo to an API with key authentication and usage-based pricing. Qwen3.5-9B on AWS SageMaker, prompted with the construction taxonomy, labels the photo by trade and phase, such as structural, MEP, finishing or sitework.",
+  "caption": "Manifold's classification API, from upload to label.",
+  "seed": 3005,
+  "rows": [
+    [{ "id": "photo", "label": "Construction-site photo", "sub": "uploaded by the client" }],
+    [{ "id": "api", "label": "API", "sub": "key authentication and usage-based pricing" }],
+    [{ "id": "model", "label": "Qwen3.5-9B on AWS SageMaker", "sub": "the construction taxonomy is encoded in the prompt", "metric": "manifold-latency", "tone": "accent" }],
+    [{ "id": "label", "label": "Trade and phase", "sub": "for example structural, MEP, finishing or sitework" }]
+  ],
+  "edges": [
+    { "from": "photo", "to": "api" },
+    { "from": "api", "to": "model" },
+    { "from": "model", "to": "label" }
+  ]
+}

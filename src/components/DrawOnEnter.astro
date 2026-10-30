@@ -1,0 +1,50 @@
+---
+/*
+  Stroke-draw-on-enter for .diagram figures (plan P3.T4). Progressive enhancement:
+  - no JS, or prefers-reduced-motion: figures are simply drawn (nothing is ever hidden first);
+  - otherwise a figure still below the fold is "armed" (strokes hidden) and draws once,
+    row by row, when a quarter of it is on screen. A figure already on screen is left alone.
+  An IntersectionObserver rather than animation-timeline: view(), because view() scrubs with
+  the scroll position and would leave strokes half drawn wherever the reader stops.
+  Only stroke dashes animate; text and boxes are always visible (the freeze test).
+  Astro bundles this script once per page however many figures it has.
+*/
+---
+
+<script>
+  const figures = document.querySelectorAll<HTMLElement>(".diagram");
+  if (figures.length && "IntersectionObserver" in window && matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add("is-drawn");
+          io.unobserve(e.target);
+        }
+      },
+      { threshold: 0.25 },
+    );
+    for (const f of figures) {
+      if (f.getBoundingClientRect().top < innerHeight) continue;
+      f.classList.add("is-armed");
+      io.observe(f);
+    }
+  }
+</script>
+
+<style is:global>
+  /* pathLength="1" (RoughPaths sets it, with the class r-draw, on undashed strokes) makes one dash the whole stroke.
+     Arming hides strokes at once (no transition); only the move to drawn is animated.
+     Screen only: a printed page shows every figure fully drawn. */
+  @media screen and (prefers-reduced-motion: no-preference) {
+    .diagram.is-armed .stage .r-draw {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+
+    .diagram.is-armed.is-drawn .stage .r-draw {
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.7s cubic-bezier(0.3, 0, 0.2, 1) calc(var(--stage, 0) * 140ms);
+    }
+  }
+</style>

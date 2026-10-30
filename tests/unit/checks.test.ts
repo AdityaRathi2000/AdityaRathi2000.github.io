@@ -16,6 +16,8 @@ test("literal numbers: bare numbers in prose, summary and what-I-got-wrong answe
   for (const token of ['"600M"', '"~6%"', '"~35%"', '"20"', '"1.8"']) assert.match(r.stderr, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.match(r.stderr, /what_i_got_wrong\[0\]\.answer/);
   assert.match(r.stderr, /bad\.mdx:9:/);
+  // Diagram specs: text fields are checked, with the JSON path in the report.
+  assert.match(r.stderr, /bad-diagram\.json \(rows\[0\]\[0\]\.label\):1:8 {2}"35%"/);
 });
 
 test("résumé: a pdf_text the PDF does not contain fails", () => {

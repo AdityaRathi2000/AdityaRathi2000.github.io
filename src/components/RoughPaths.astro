@@ -1,5 +1,9 @@
 ---
 // Renders path data from src/lib/rough.ts. Colour comes from the class, never inline.
+// Undashed strokes get pathLength="1" so DrawOnEnter can draw them with one dash; a dashed
+// stroke keeps its real length, or its dash pattern would be rescaled. They are tagged with
+// the class r-draw for CSS: an attribute selector cannot be used, because in HTML documents
+// `path[pathLength]` is lowercased to [pathlength] and never matches an SVG attribute.
 import type { RoughPath } from "../lib/rough";
 
 interface Props {
@@ -9,4 +13,14 @@ interface Props {
 const { paths } = Astro.props;
 ---
 
-{paths.map((p) => <path d={p.d} class={p.cls} stroke-width={p.width} stroke-dasharray={p.dash} />)}
+{
+  paths.map((p) => (
+    <path
+      d={p.d}
+      class={p.dash ? p.cls : `${p.cls} r-draw`}
+      stroke-width={p.width}
+      stroke-dasharray={p.dash}
+      pathLength={p.dash ? undefined : 1}
+    />
+  ))
+}

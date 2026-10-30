@@ -1,0 +1,6 @@
+{
+  "title": "A pipeline",
+  "seed": 7,
+  "rows": [[{ "id": "merge", "label": "Merges 35% more providers", "metric": "cvi-sources" }]],
+  "edges": []
+}

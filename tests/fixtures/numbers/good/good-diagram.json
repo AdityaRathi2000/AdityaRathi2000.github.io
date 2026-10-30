@@ -1,0 +1,6 @@
+{
+  "title": "Served on RTX 5090s with FP8",
+  "seed": 3002,
+  "rows": [[{ "id": "tier-2", "label": "Qwen3.5-9B on K-12 records since 2024", "metric": "edu-records" }]],
+  "edges": [{ "from": "tier-2", "to": "tier-2" }]
+}

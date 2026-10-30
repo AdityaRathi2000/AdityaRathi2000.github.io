@@ -1,0 +1,165 @@
+---
+/*
+  An architecture figure from src/diagrams/<name>.json (plan P3.T1). Laid out by
+  src/lib/diagram.ts, drawn with build-time Rough.js; no client JS draws anything.
+  Numbers come only from the metrics registry: a node's `metric` prints its value when the
+  row is ready and nothing when it is a draft. The spoken description lists the same
+  numbers, generated from the registry, so screen readers get what the picture shows.
+  Strokes draw once when the figure scrolls into view (DrawOnEnter); text never animates,
+  so any paused frame still carries the figure's information.
+*/
+import { getCollection } from "astro:content";
+import { arrowhead, layout, validate, type DiagramSpec, TYPE, GEOMETRY } from "../lib/diagram";
+import { formatValue, spokenValue } from "../lib/metrics";
+import { sketch } from "../lib/rough";
+import DrawOnEnter from "./DrawOnEnter.astro";
+import RoughPaths from "./RoughPaths.astro";
+
+interface Props {
+  name: string;
+}
+
+const { name } = Astro.props;
+const specs = import.meta.glob<DiagramSpec>("../diagrams/*.json", { eager: true, import: "default" });
+const spec = specs[`../diagrams/${name}.json`];
+if (!spec) throw new Error(`<Diagram name="${name}">: no src/diagrams/${name}.json`);
+
+const metrics = new Map((await getCollection("metrics")).map((m) => [m.id, m.data]));
+const errors = validate(spec, new Set(metrics.keys()));
+if (errors.length) throw new Error(`src/diagrams/${name}.json: ${errors.join("; ")}`);
+
+const counters: Record<string, string> = {};
+const spoken: string[] = [];
+for (const n of spec.rows.flat()) {
+  const m = n.metric ? metrics.get(n.metric) : undefined;
+  if (!m || m.status !== "ready") continue;
+  counters[n.id] = `${formatValue(m)} ${m.label}`;
+  spoken.push(`${spokenValue(m)} ${m.label}`);
+}
+
+const L = layout(spec, counters);
+const s = sketch(spec.seed);
+const P = GEOMETRY.pad;
+const id = `dg-${name}`;
+
+const nodes = L.nodes.map((n) => ({
+  n,
+  outline: s.rect(n.x, n.y, n.w, n.h, { width: n.tone === "accent" ? 1.8 : 1.3, tone: n.tone === "ink" ? undefined : n.tone }),
+  wash: n.tone === "accent" ? s.rect(n.x + 3, n.y + 3, n.w - 6, n.h - 6, { hachure: true, width: 0.8, roughness: 0.6 }).filter((p) => p.cls === "r-fill") : [],
+}));
+const edges = L.edges.map((e) => ({
+  e,
+  line:
+    e.points.length === 2
+      ? s.line(...e.points[0], ...e.points[1], { width: 1.2, tone: "muted", dash: e.dash ? [5, 5] : undefined })
+      : s.path(`M${e.points.map((p) => p.join(" ")).join(" L")}`, { width: 1.2, tone: "muted", dash: e.dash ? [5, 5] : undefined, roughness: 0.9 }),
+  head: s.path(arrowhead(e.points), { width: 1.3, tone: "muted", roughness: 0.5 }),
+}));
+const frame = s.rect(-P + 3, -P + 3, L.width + 2 * P - 6, L.height + 2 * P - 6, {
+  tone: "muted",
+  width: 1.1,
+  roughness: 0.8,
+  dash: spec.synthetic ? [7, 6] : undefined,
+});
+const stages = L.nodes.reduce((max, n) => Math.max(max, n.row), 0) + 1;
+const desc = spoken.length ? `${spec.desc} Numbers shown: ${spoken.join("; ")}.` : spec.desc;
+---
+
+<figure class="diagram" data-diagram={name}>
+  <svg
+    class="rough"
+    viewBox={`${-P} ${-P} ${L.width + 2 * P} ${L.height + 2 * P}`}
+    role="img"
+    aria-labelledby={`${id}-title ${id}-desc`}
+  >
+    <title id={`${id}-title`}>{spec.title}</title>
+    <desc id={`${id}-desc`}>{desc}</desc>
+    <g class="stage" style="--stage: 0"><RoughPaths paths={frame} /></g>
+    {
+      Array.from({ length: stages + 1 }, (_, stage) => (
+        <g class="stage" style={`--stage: ${stage}`}>
+          {edges
+            .filter(({ e }) => e.stage === stage)
+            .map(({ e, line, head }) => (
+              <g class="d-edge" data-edge={`${e.from}->${e.to}`}>
+                <RoughPaths paths={line} />
+                <RoughPaths paths={head} />
+                {e.label && (
+                  <text
+                    class="r-note"
+                    x={e.label.x}
+                    y={e.label.y}
+                    font-size={TYPE.edge.size}
+                    text-anchor={e.kind === "down" ? "start" : "middle"}
+                    transform={e.label.rotate ? `rotate(-90 ${e.label.x} ${e.label.y})` : undefined}
+                  >
+                    {e.label.lines.map((t, i) => (
+                      <tspan x={e.label!.x} dy={i === 0 ? 0 : TYPE.edge.line}>
+                        {t}
+                      </tspan>
+                    ))}
+                  </text>
+                )}
+              </g>
+            ))}
+          {nodes
+            .filter(({ n }) => n.row === stage)
+            .map(({ n, outline, wash }) => (
+              <g class="d-node" data-node={n.id}>
+                <rect class="r-solid d-box" x={n.x} y={n.y} width={n.w} height={n.h} />
+                <RoughPaths paths={wash} />
+                <RoughPaths paths={outline} />
+                {n.lines.map((l) => (
+                  <text
+                    class={`d-${l.kind}${l.kind === "sub" ? " r-note" : ""}`}
+                    x={n.x + GEOMETRY.padX}
+                    y={n.y + l.y}
+                    font-size={TYPE[l.kind].size}
+                  >
+                    {l.text}
+                  </text>
+                ))}
+              </g>
+            ))}
+        </g>
+      ))
+    }
+  </svg>
+  {
+    (spec.caption || spec.synthetic) && (
+      <figcaption>
+        {spec.synthetic && <em>Synthetic data, real mechanism. </em>}
+        {spec.caption}
+      </figcaption>
+    )
+  }
+</figure>
+<DrawOnEnter />
+
+<style>
+  .diagram {
+    margin: 0;
+    max-width: 34rem;
+  }
+
+  .diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .diagram :global(.d-label) {
+    font-weight: 500;
+  }
+
+  .diagram :global(.d-metric) {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  figcaption {
+    margin-top: var(--space-xs);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+</style>
