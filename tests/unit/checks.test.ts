@@ -10,11 +10,12 @@ test("literal numbers: names, years, comments, code and <Metric> pass", () => {
   assert.equal(r.status, 0, r.stderr);
 });
 
-test("literal numbers: bare numbers in prose and summary fail, with locations", () => {
+test("literal numbers: bare numbers in prose, summary and what-I-got-wrong answers fail, with locations", () => {
   const r = run("scripts/check-no-literal-numbers.mjs", ["tests/fixtures/numbers/bad"]);
   assert.equal(r.status, 1);
-  for (const token of ['"600M"', '"~35%"', '"20"', '"1.8"']) assert.match(r.stderr, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.match(r.stderr, /bad\.mdx:6:/);
+  for (const token of ['"600M"', '"~6%"', '"~35%"', '"20"', '"1.8"']) assert.match(r.stderr, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(r.stderr, /what_i_got_wrong\[0\]\.answer/);
+  assert.match(r.stderr, /bad\.mdx:9:/);
 });
 
 test("résumé: a pdf_text the PDF does not contain fails", () => {

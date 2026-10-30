@@ -1,7 +1,8 @@
 // Fails when a number appears in case-study prose outside <Metric> (plan §4, veto V1).
 // Usage: node scripts/check-no-literal-numbers.mjs [dir ...]   (default: src/content/case-studies)
 //
-// Checked: the MDX body, plus the frontmatter fields shown to readers (title, summary).
+// Checked: the MDX body, plus the frontmatter fields shown to readers (title, summary,
+// what_i_got_wrong[].answer).
 // Ignored: JSX/HTML tags (so <Metric id="..."/> passes), MDX comments, code, link URLs,
 // ordered-list markers, four-digit years, and tokens that are part of a name
 // (FP8, K-12, RTX 5090s, Qwen3.5-9B, FlashAttention-2).
@@ -55,10 +56,12 @@ for (const dir of targets) {
     const bodyStart = fm ? fm[0].split("\n").length - 1 : 0;
     if (fm) {
       const data = parseYaml(fm[1]) ?? {};
-      for (const field of ["title", "summary"]) {
-        if (typeof data[field] === "string") {
-          for (const f of findings(data[field], `${file} (frontmatter ${field})`, 0)) problems.push(f);
-        }
+      const shown = ["title", "summary"].filter((f) => typeof data[f] === "string").map((f) => [f, data[f]]);
+      (Array.isArray(data.what_i_got_wrong) ? data.what_i_got_wrong : []).forEach((w, i) => {
+        if (typeof w?.answer === "string") shown.push([`what_i_got_wrong[${i}].answer`, w.answer]);
+      });
+      for (const [field, text] of shown) {
+        for (const f of findings(text, `${file} (frontmatter ${field})`, 0)) problems.push(f);
       }
     }
     problems.push(...findings(fm ? src.slice(fm[0].length) : src, file, bodyStart));

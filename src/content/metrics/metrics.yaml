@@ -26,20 +26,17 @@
   provenance: measured
   pdf_text: "~20 sources"
 
-- id: cvi-canonical-growth
-  status: draft
-  needs: >-
-    baseline (canonical provider count the year before, and after); the split between growth
-    from new sources and growth from better merging; pairwise precision/recall on a
-    hand-adjudicated sample (evidence.n, evidence.ci).
-  label: growth in canonical providers, year over year
-  value: 35
-  unit: percent
-  qualifier: approx
-  scope: Canonical (deduplicated) training providers in the Credential Value Index
-  as_of: 2026-10
+# The résumé's "~35% YoY" growth is not shown (Aditya's decision, 2026-10-30); the count of
+# canonical providers in the July 2026 release replaces it. Counted 2026-10-30 at Aditya's
+# request; he approved publishing it.
+- id: cvi-providers
+  status: ready
+  label: canonical providers
+  value: 1040744
+  unit: count
+  scope: Distinct provider names after entity resolution, in the July 2026 release of the Credential Value Index
+  as_of: 2026-07
   provenance: measured
-  pdf_text: "~35% YoY"
 
 - id: cvi-descriptions
   status: ready
@@ -52,20 +49,8 @@
   provenance: measured
   pdf_text: "~4.3M provider descriptions"
 
-- id: cvi-residual-recovery
-  status: draft
-  needs: >-
-    a definition of "hardest residual"; how a recovered description was judged correct;
-    how many were checked (evidence.n) and the comparator (baseline, e.g. the share recovered
-    without grounded search).
-  label: hardest residuals recovered with grounded search
-  value: 77
-  unit: percent
-  qualifier: approx
-  scope: Providers the earlier cascade tiers could not describe
-  as_of: 2026-10
-  provenance: measured
-  pdf_text: "~77% of the hardest residuals"
+# The résumé's "~77% of the hardest residuals" is not shown (Aditya dropped it, 2026-10-30):
+# it has no comparator.
 
 # ---------- Postings extraction stack ----------
 
@@ -93,8 +78,9 @@
 - id: ner-f1
   status: draft
   needs: >-
-    gold-set size (evidence.n) and who labelled it; annotator agreement if measured; the
-    comparator (baseline, e.g. the LLM teacher or a rules-only tier on the same gold set).
+    baseline: F1 of the LLM teacher (the model that wrote the training labels) on the same
+    gold set (Aditya chose this comparator 2026-10-30; value to come). The gold-set size is
+    known only as "1,000 or more", so it stays in the caveat, not evidence.n.
   label: NER F1 against the gold set
   value: 88
   unit: percent
@@ -102,6 +88,7 @@
   scope: Fine-tuned ModernBERT section segmentation on a hand-labelled gold set
   as_of: 2026-10
   provenance: measured
+  caveat: Gold set of 1,000 or more postings, labelled by interns and checked by me.
   pdf_text: "~88% F1 vs. gold"
 
 - id: edu-predictions
@@ -139,23 +126,23 @@
 - id: edu-accuracy
   status: draft
   needs: >-
-    holdout size (evidence.n) and a 95% interval (evidence.ci); how the holdout was drawn
-    (evidence.split); the comparator (baseline, e.g. accuracy of the previous approach or of
-    the frozen encoder at the same coverage).
+    baseline: accuracy of the same model when it answers every record (Aditya does not have
+    it yet, 2026-10-30); the size of the judged sample (evidence.n).
   label: accuracy at the chosen coverage
   value: 93
   unit: percent
-  scope: Domain-specialised education classifier on a labelled US holdout
+  scope: Domain-specialised education classifier on a US sample stratified by domain
   group: edu-operating-point
   as_of: 2026-10
   provenance: measured
+  caveat: Scored by an LLM acting as judge on a sample stratified by domain, not on a hand-labelled holdout.
   pdf_text: "93% accuracy at 94% coverage"
 
 - id: edu-coverage
   status: draft
   needs: >-
-    the same holdout as edu-accuracy; the comparator (baseline: accuracy at full coverage,
-    so readers see what abstaining on the rest buys).
+    stays a draft while edu-accuracy is one (same operating point); the comparator is
+    accuracy at full coverage, so readers see what abstaining on the rest buys.
   label: share of records the classifier answers
   value: 94
   unit: percent
@@ -169,7 +156,8 @@
   status: draft
   needs: >-
     absolute F1 before and after (baseline = frozen-encoder F1); the evaluation set
-    (evidence.n, evidence.split).
+    (evidence.n, evidence.split). The gain is relative (Aditya, 2026-10-30); the sheet's
+    0.70 to 0.83 was the closest option, not the real values.
   label: F1 gain from task-adaptive fine-tuning over a frozen encoder
   value: 19
   unit: percent
@@ -184,7 +172,8 @@
   status: draft
   needs: >-
     absolute AUC before and after (baseline = text-free XGBoost AUC); whether the evaluation
-    was a time split (evidence.split).
+    was a time split (evidence.split). The sheet's 0.80 to 0.93 was the closest option, not
+    the real values (Aditya, 2026-10-30).
   label: AUC lift from learned text features
   value: 16
   unit: percent
@@ -216,21 +205,22 @@
 - id: sophos-queue-time
   status: draft
   needs: >-
-    absolute queue time before and after (baseline) and the comparison window; whether
-    this was measured by you or reported by the team (provenance).
+    absolute queue time before and after (baseline). Provenance settled 2026-10-30: reported
+    by the Sophos team, window not recorded.
   label: cut in analyst queue time
   value: 23
   unit: percent
   scope: Production alert queue after the system shipped
   as_of: 2022-12
   provenance: reported
+  caveat: Reported by the Sophos team; the measurement window was not recorded.
   pdf_text: "cut analyst queue time by 23%"
 
 - id: sophos-fp-suppressed
   status: draft
   needs: >-
-    the comparison window and the alert volume behind it (evidence.n); baseline (false
-    positives reaching analysts before).
+    the alert volume behind it (evidence.n); baseline (false positives reaching analysts
+    before). Provenance settled 2026-10-30: reported by the Sophos team, window not recorded.
   label: false positives suppressed
   value: 54
   unit: percent
@@ -238,12 +228,14 @@
   group: sophos-operating-point
   as_of: 2022-12
   provenance: reported
+  caveat: Reported by the Sophos team; the measurement window was not recorded.
   pdf_text: "suppressed 54% of false positives"
 
 - id: sophos-detection
   status: draft
   needs: >-
-    the same window as sophos-fp-suppressed; baseline (detection rate before).
+    baseline (detection rate before). Provenance settled 2026-10-30: reported by the Sophos
+    team, window not recorded.
   label: detection rate kept
   value: 95.1
   unit: percent
@@ -251,22 +243,21 @@
   group: sophos-operating-point
   as_of: 2022-12
   provenance: reported
+  caveat: Reported by the Sophos team; the measurement window was not recorded.
   pdf_text: "95.1% detection"
 
 # ---------- Manifold (2026) ----------
 
 - id: manifold-latency
-  status: draft
-  needs: >-
-    which percentile (p50 or p95), the hardware (SageMaker instance type) and concurrency;
-    put them in scope/caveat.
-  label: inference time per photo
+  status: ready
+  label: median inference time per photo
   value: 2000
   unit: ms
   qualifier: lt
-  scope: Hosted classification API, single construction-site photo
+  scope: Hosted classification API, median time for one construction-site photo
   as_of: 2026
   provenance: measured
+  caveat: Measured on one ml.g5.xlarge SageMaker instance (NVIDIA A10G) with two to five requests in flight.
   pdf_text: "sub-2-second inference"
 
 # ---------- Kalshi weather model (2026) ----------
@@ -294,16 +285,17 @@
   provenance: measured
   pdf_text: "200+ subjects"
 
+# Baseline: guessing uniformly among N balanced classes gives macro F1 = 1/N; with 200 or
+# more subjects that is at most 0.5% (Aditya chose this comparator, 2026-10-30).
 - id: brainai-f1
-  status: draft
-  needs: >-
-    a comparator (baseline). Suggestion: chance level for closed-set identification over
-    200+ subjects is below 0.5%; or the best single-modality model. Also evidence.n (test
-    recordings). Split confirmed by Aditya on 2026-10-26: session-level, stratified k-fold.
+  status: ready
   label: identification F1
   value: 77
   unit: percent
   scope: Closed-set identification, session-level stratified k-fold
+  baseline:
+    label: chance level for 200 subjects
+    value: 0.5
   as_of: 2022
   provenance: measured
   caveat: Session-level stratified k-fold; no recording session appears in both train and test.
