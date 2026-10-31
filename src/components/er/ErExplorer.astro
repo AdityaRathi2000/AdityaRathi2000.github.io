@@ -1,0 +1,564 @@
+---
+/*
+  CVI entity-resolution explorer (plan P6.T1). Server-rendered at the default setting, which
+  is what visitors without JS, printing, or before it scrolls near see; the controls stay
+  disabled until src/scripts/er-explorer.ts loads (dynamic import when the section is near
+  the viewport) and fetches public/data/er-sample.json. All maths lives in
+  src/lib/er-explorer.ts, shared with the driver, so both render the same numbers.
+  Synthetic data, real mechanism: permanent tag and dashed frame (veto V2). The real CVI
+  numbers sit in their own solid ledger above the frame, never in the demo.
+*/
+import raw from "../../../public/data/er-sample.json";
+import {
+  HIST,
+  HIST_MAX,
+  INITIAL_KEY,
+  THRESHOLD,
+  bucketLabel,
+  evaluate,
+  fmtCount as fmt,
+  fmtJudgeShare,
+  fmtScore as score,
+  histBarHeight,
+  histDesc,
+  histLabelY,
+  largestNote,
+  logWidth,
+  parseSample,
+  placeOf as place,
+  sim,
+  summaryText,
+} from "../../lib/er-explorer";
+import { sketch } from "../../lib/rough";
+import Metric from "../Metric.astro";
+import RoughPaths from "../RoughPaths.astro";
+
+const sample = parseSample(raw);
+const r = evaluate(sample, INITIAL_KEY, THRESHOLD.initial);
+const truthCount = r.trueCount;
+const sources = new Set(sample.records.map((x) => x.src)).size;
+
+// One y-scale for every setting, so bars can be compared as the controls move.
+let yMax = 1;
+for (let k = 0; k < sample.keys.length; k++) {
+  for (let t = THRESHOLD.min; t <= THRESHOLD.max; t += THRESHOLD.step) {
+    const e = evaluate(sample, k, t);
+    yMax = Math.max(yMax, ...e.hist, ...e.trueHist);
+  }
+}
+
+// Depth 1 rows split the row above them; depth 2 is a part of its depth-1 parent. Every row is at most its parent.
+const FUNNEL = [
+  ["allPairs", "All possible pairs", 0],
+  ["compared", "Compared inside blocks", 0],
+  ["considered", "Similar enough to consider", 0],
+  ["autoMerged", "merged on score alone", 1],
+  ["sentToJudge", "sent to the judge", 1],
+  ["judgeMerged", "merged by the judge", 2],
+] as const;
+
+const { w: HW, h: HH, base: BASE } = HIST;
+const slot = HW / HIST_MAX;
+const barH = (c: number) => histBarHeight(c, yMax);
+
+// Card slots for the largest merged provider: hero-style rough outlines, stretched to the card.
+const CARD_SLOTS = 8;
+const s = sketch(20261101, { singleStroke: true, precision: 0 });
+const outlines = Array.from({ length: CARD_SLOTS }, () => s.rect(2, 2, 196, 36, { width: 1.1 }));
+const tick = s.path("M3 10 L8 15 L17 4", { width: 1.6, roughness: 0.6 });
+const cross = [...s.line(4, 4, 15, 15, { width: 1.6, roughness: 0.6 }), ...s.line(15, 4, 4, 15, { width: 1.6, roughness: 0.6 })];
+const cards = Array.from({ length: CARD_SLOTS }, (_, i) => {
+  const idx = r.largest.members[i];
+  return idx === undefined ? null : { rec: sample.records[idx], ok: r.largest.correct[i] };
+});
+const more = Math.max(0, r.largest.members.length - CARD_SLOTS);
+const summary = summaryText(sample, r);
+---
+
+<section class="er" aria-labelledby="er-title" data-er data-src="/data/er-sample.json" data-ymax={yMax}>
+  <h2 id="er-title">Try the mechanism</h2>
+  <p class="er-intro">
+    The same four stages, run on invented records. Choose what two records must share before they are compared, and the
+    similarity at which a pair merges on its score alone. Pairs just below that go to the judge.
+  </p>
+
+  <aside class="er-ledger" aria-label="The real pipeline">
+    <p>
+      <strong>The real pipeline</strong> reconciles <Metric id="cvi-sources" /> sources into <Metric id="cvi-providers" /> canonical
+      providers. None of its data is in the demo below.
+    </p>
+  </aside>
+
+  <div class="er-frame">
+    <p class="er-tag">Synthetic data, real mechanism</p>
+    <p class="er-about">
+      {fmt(sample.records.length)} invented records of {fmt(truthCount)} invented organisations ({fmt(truthCount - r.trueBusinesses)} training
+      providers and {fmt(r.trueBusinesses)} look-alike businesses), from {sources} made-up sources. Similarity is a character-trigram score standing in for embedding similarity. A fixed rule stands in for the
+      LLM: it reads name, town and state, and rejects a different kind of organisation, a different town or a named campus.
+    </p>
+
+    <fieldset class="er-controls" data-er-controls disabled>
+      <legend class="visually-hidden">Explorer settings</legend>
+      <fieldset class="er-keys">
+        <legend class="er-label">Compare only records with the</legend>
+        {
+          sample.keys.map((k, i) => (
+            <label class="er-radio">
+              <input type="radio" name="er-key" value={i} checked={i === INITIAL_KEY} />
+              <span>{k.label.replace(/^Same /, "same ")}</span>
+            </label>
+          ))
+        }
+      </fieldset>
+      <div class="er-slider">
+        <label class="er-label" for="er-t">Merge on similarity alone at</label>
+        <div class="er-range">
+          <input id="er-t" type="range" min={THRESHOLD.min} max={THRESHOLD.max} step={THRESHOLD.step} value={THRESHOLD.initial} aria-valuetext={sim(THRESHOLD.initial)} />
+          <output class="num" for="er-t" data-out="t">{sim(THRESHOLD.initial)}</output>
+        </div>
+        <p class="er-band">
+          The judge decides pairs from{" "}<span class="num" data-out="bandLow">{sim(r.bandLow)}</span>{" "}up to{" "}<span class="num" data-out="bandHigh">{sim(THRESHOLD.initial)}</span>.
+        </p>
+      </div>
+    </fieldset>
+    <p class="er-status" data-er-status hidden>The demo data did not load; this is the default setting.</p>
+    <noscript><p class="er-status">The controls need JavaScript; this is the default setting.</p></noscript>
+
+    <div class="er-results">
+      <figure class="er-funnel">
+        <figcaption>Pairs at each step <span class="er-fine">(indented rows split the row above; bar length on a log scale)</span></figcaption>
+        <ol>
+          {
+            FUNNEL.map(([k, label, depth]) => (
+              <li data-depth={depth}>
+                <span class="er-step">{label}</span>
+                <span class="num er-n" data-out={k}>
+                  {fmt(r.funnel[k])}
+                </span>
+                <span class="er-bar" aria-hidden="true">
+                  <span data-bar={k} style={`--w: ${logWidth(r.funnel[k], r.funnel.allPairs).toFixed(1)}`} />
+                </span>
+              </li>
+            ))
+          }
+        </ol>
+      </figure>
+
+      <div class="er-scores">
+        <dl>
+          <div>
+            <dt>Organisations found</dt>
+            <dd><span class="num er-big" data-out="found">{fmt(r.found)}</span> <span class="er-fine">against {fmt(truthCount)} true</span></dd>
+          </div>
+          <div>
+            <dt>Precision</dt>
+            <dd><span class="num er-big" data-out="precision">{score(r.precision)}</span></dd>
+          </div>
+          <div>
+            <dt>Recall</dt>
+            <dd><span class="num er-big" data-out="recall">{score(r.recall)}</span></dd>
+          </div>
+          <div>
+            <dt>Cost: judge calls per 100 compared pairs</dt>
+            <dd><span class="num er-big" data-out="judgeShare">{fmtJudgeShare(r)}</span></dd>
+          </div>
+        </dl>
+        <p class="er-fine er-defs">
+          Precision: of the pairs of records merged into one organisation, the share that truly are one. Recall: of the pairs that
+          truly are one organisation, the share merged.
+        </p>
+      </div>
+
+      <figure class="er-hist">
+        <figcaption>Records per organisation: merged here (bars) against the truth (outlines)</figcaption>
+        <svg viewBox={`0 0 ${HW} ${HH}`} role="img" aria-labelledby="er-hist-desc" data-hist>
+          <desc id="er-hist-desc" data-out="histDesc">{histDesc(r)}</desc>
+          <line class="er-axis" x1="0" y1={BASE} x2={HW} y2={BASE} />
+          {
+            r.hist.map((c, i) => (
+              <g>
+                <rect class="er-hbar" data-hbar={i} x={i * slot + 8} width={slot - 16} y={BASE - barH(c)} height={barH(c)} />
+                <rect class="er-htrue" data-htrue={i} x={i * slot + 5} width={slot - 10} y={BASE - barH(r.trueHist[i])} height={barH(r.trueHist[i])} />
+                <text class="er-hcount num" data-hcount={i} x={i * slot + slot / 2} y={histLabelY(r, i, yMax)} text-anchor="middle">
+                  {c}
+                </text>
+                <text class="er-hlabel" x={i * slot + slot / 2} y={BASE + 18} text-anchor="middle">
+                  {bucketLabel(i)}
+                </text>
+              </g>
+            ))
+          }
+          <text class="er-hlabel" x={HW / 2} y={HH - 2} text-anchor="middle">records in the organisation</text>
+        </svg>
+      </figure>
+
+      <figure class="er-largest">
+        <figcaption>
+          The largest merged group: <span data-out="largestNote">{largestNote(r)}</span>
+        </figcaption>
+        <ul class="rough">
+          {
+            outlines.map((o, i) => (
+              <li class="er-card" data-card={i} data-ok={cards[i]?.ok ? "" : undefined} data-empty={cards[i] ? undefined : ""}>
+                <svg class="er-card-outline" viewBox="0 0 200 40" preserveAspectRatio="none" aria-hidden="true">
+                  <RoughPaths paths={o} />
+                </svg>
+                <span class="er-card-name" data-card-name>{cards[i]?.rec.name}</span>
+                <span class="er-card-place" data-card-place>{cards[i] ? place(cards[i]!.rec) : ""}</span>
+                <svg class="er-mark er-mark-ok" viewBox="0 0 20 20" aria-hidden="true"><RoughPaths paths={tick} /></svg>
+                <svg class="er-mark er-mark-no" viewBox="0 0 20 20" aria-hidden="true"><RoughPaths paths={cross} /></svg>
+                <span class="visually-hidden" data-card-verdict>{cards[i] && (cards[i]!.ok ? "(the main organisation)" : "(a different true organisation)")}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="er-fine er-more" data-out="more" data-empty={more === 0 ? "" : undefined}>and {more} more</p>
+      </figure>
+    </div>
+    <p class="visually-hidden" aria-live="polite" data-out="summary">{summary}</p>
+  </div>
+</section>
+
+<script>
+  // Load the driver and its data only when the reader gets near the explorer.
+  const root = document.querySelector<HTMLElement>("[data-er]");
+  if (root && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        import("../../scripts/er-explorer")
+          .then((m) => m.start(root))
+          .catch(() => {
+            const status = root.querySelector<HTMLElement>("[data-er-status]");
+            if (status) status.hidden = false;
+          });
+      },
+      { rootMargin: "600px 0px" },
+    );
+    io.observe(root);
+  }
+</script>
+
+<style>
+  .er {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 62rem;
+    border-top: 1px solid color-mix(in srgb, var(--ink-2) 35%, transparent);
+    padding-top: var(--space-m);
+  }
+
+  .er-intro,
+  .er-ledger {
+    max-width: var(--measure);
+  }
+
+  .er-ledger {
+    border: 1px solid color-mix(in srgb, var(--ink-2) 55%, transparent);
+    border-radius: var(--radius-s);
+    padding: var(--space-xs) var(--space-s);
+    font-size: var(--step--1);
+  }
+
+  /* Dashed frame: the mark of synthetic data (veto V2). */
+  .er-frame {
+    display: grid;
+    gap: var(--space-m);
+    border: 1.5px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-m));
+  }
+
+  .er-tag {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.02em;
+    border: 1px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-3xs) var(--space-2xs);
+    margin-top: calc(-1 * var(--space-xs));
+  }
+
+  .er-about {
+    max-width: var(--measure);
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .er-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+    gap: var(--space-m);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .er-controls:disabled {
+    opacity: 0.6;
+  }
+
+  .er-label {
+    font-style: italic;
+    color: var(--ink-2);
+    margin-bottom: var(--space-2xs);
+  }
+
+  .er-keys {
+    display: grid;
+    gap: var(--space-3xs);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .er-keys legend {
+    padding: 0;
+  }
+
+  .er-radio {
+    display: flex;
+    gap: var(--space-2xs);
+    align-items: center;
+  }
+
+  .er-radio input,
+  .er-range input {
+    accent-color: var(--accent);
+  }
+
+  .er-range {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .er-range input {
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+  }
+
+  .er-range output {
+    font-size: var(--step-1);
+    min-width: 4ch;
+  }
+
+  .er-band {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .er-status {
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .er-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+    gap: var(--space-l) var(--space-xl);
+  }
+
+  figure {
+    margin: 0;
+    display: grid;
+    gap: var(--space-xs);
+    align-content: start;
+  }
+
+  figcaption {
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .er-fine {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    font-style: normal;
+  }
+
+  .er-funnel ol {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .er-funnel li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-3xs) var(--space-s);
+  }
+
+  .er-funnel li[data-depth="1"] {
+    --depth: 1;
+  }
+
+  .er-funnel li[data-depth="2"] {
+    --depth: 2;
+  }
+
+  /* Only the label indents: every bar shares one track, so lengths compare across rows. */
+  .er-funnel li:not([data-depth="0"]) .er-step {
+    font-style: italic;
+    padding-left: calc(var(--depth) * 1.25rem);
+  }
+
+  .er-n {
+    text-align: right;
+    min-width: 7ch;
+  }
+
+  .er-bar {
+    grid-column: 1 / -1;
+    height: 0.5rem;
+    background: color-mix(in srgb, var(--ink-2) 14%, transparent);
+    border-radius: 1px;
+  }
+
+  .er-bar span {
+    display: block;
+    height: 100%;
+    width: calc(var(--w) * 1%);
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  .er-scores dl {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s) var(--space-m);
+  }
+
+  .er-scores dt {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .er-big {
+    font-size: var(--step-2);
+    line-height: 1.1;
+  }
+
+  .er-defs {
+    margin-top: var(--space-s);
+  }
+
+  .er-hist svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .er-axis {
+    stroke: var(--ink-2);
+    stroke-width: 1;
+  }
+
+  .er-hbar {
+    fill: var(--accent-wash);
+    stroke: var(--accent);
+    stroke-width: 1.2;
+  }
+
+  .er-htrue {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1;
+  }
+
+  .er-hcount,
+  .er-hlabel {
+    fill: var(--ink-2);
+    font-size: 12px;
+  }
+
+  .er-hcount {
+    font-family: var(--font-mono);
+  }
+
+  .er-hlabel {
+    font-family: var(--font-serif);
+  }
+
+  .er-largest ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-2xs) var(--space-s);
+  }
+
+  .er-card {
+    position: relative;
+    display: grid;
+    padding: var(--space-2xs) 2rem var(--space-2xs) var(--space-xs);
+    min-height: 3.5rem;
+    align-content: center;
+  }
+
+  /* Empty slots keep their space, so the explorer never changes height as the controls move. */
+  .er-card[data-empty],
+  .er-more[data-empty] {
+    visibility: hidden;
+  }
+
+  .er-card-outline {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .er-card-outline :global(path) {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .er-card-name,
+  .er-card-place {
+    position: relative;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .er-card-place {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .er-mark {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    translate: 0 -50%;
+    overflow: visible;
+  }
+
+  .er-card:not([data-ok]) .er-mark-ok,
+  .er-card[data-ok] .er-mark-no {
+    display: none;
+  }
+
+  .er-mark-ok :global(.r-stroke) {
+    stroke: var(--accent);
+  }
+
+  .er-mark-no :global(.r-stroke) {
+    stroke: var(--data);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .er-bar span {
+      transition: width 180ms var(--ease-out);
+    }
+  }
+</style>
