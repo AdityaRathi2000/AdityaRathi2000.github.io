@@ -16,6 +16,7 @@
 
   /* Type families. Piazzolla chosen at the P1.T4 tile gate (2026-10-26). */
   --font-serif: "Piazzolla", "Piazzolla Georgia", "Piazzolla Times", "Piazzolla Noto", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; /* matched fallbacks: fonts.css */
+  --font-serif-display: "Piazzolla", "Piazzolla Display Georgia", "Piazzolla Display Times", "Piazzolla Display Noto", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif; /* h1, h2: matched at display sizes (fonts.css) */
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; /* taste-skill-ignore: plan §5 */
 
   /*

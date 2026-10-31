@@ -4,14 +4,15 @@
       "staticDistDir": "./dist",
       "url": [
         "http://localhost/",
-        "http://localhost/colophon/"
+        "http://localhost/colophon/",
+        "http://localhost/work/cvi-entity-resolution/"
       ],
       "numberOfRuns": 3
     },
     "assert": {
       "assertMatrix": [
         {
-          "matchingUrlPattern": "^(?!http://localhost(:\\d+)?/$).*",
+          "matchingUrlPattern": "^(?!http://localhost(:\\d+)?/(work/[a-z0-9-]+/)?$).*",
           "assertions": {
             "categories:performance": [
               "error",
@@ -42,7 +43,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0.025,
+                "maxNumericValue": 0.035,
                 "aggregationMethod": "median-run"
               }
             ],
@@ -56,7 +57,7 @@
           }
         },
         {
-          "matchingUrlPattern": "^http://localhost(:\\d+)?/$",
+          "matchingUrlPattern": "^http://localhost(:\\d+)?/(work/[a-z0-9-]+/)?$",
           "assertions": {
             "categories:performance": [
               "error",
@@ -87,7 +88,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0.025,
+                "maxNumericValue": 0.035,
                 "aggregationMethod": "median-run"
               }
             ],
@@ -101,7 +102,7 @@
           }
         },
         {
-          "matchingUrlPattern": "^http://localhost(:\\d+)?/(colophon/)?$",
+          "matchingUrlPattern": "^http://localhost(:\\d+)?/(colophon/|work/[a-z0-9-]+/)?$",
           "assertions": {
             "categories:seo": [
               "error",

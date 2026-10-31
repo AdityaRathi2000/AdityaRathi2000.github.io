@@ -1,0 +1,32 @@
+---
+/*
+  Renders its content only when the named metrics are ready in the registry (Aditya,
+  2026-10-31: a sentence that cites a draft number is left out of the page, and appears with
+  its number on the day the row turns ready). Use around a sentence or a whole section:
+    <WhenReady ids="ner-f1">The model reaches <Metric id="ner-f1" /> against it.</WhenReady>
+  `ids`: all of them must be ready. `any`: at least one must be (for a heading over several
+  guarded sentences). An unknown id fails the build, like <Metric>.
+*/
+import { getEntry } from "astro:content";
+
+interface Props {
+  ids?: string;
+  any?: string;
+}
+
+const { ids, any } = Astro.props;
+const list = (s?: string) => (s ?? "").split(/\s+/).filter(Boolean);
+if (!list(ids).length && !list(any).length) throw new Error("<WhenReady>: give ids or any");
+
+async function ready(id: string) {
+  const entry = await getEntry("metrics", id);
+  if (!entry) throw new Error(`<WhenReady>: no metric "${id}" in src/content/metrics/metrics.yaml`);
+  return entry.data.status === "ready";
+}
+
+const all = await Promise.all(list(ids).map(ready));
+const some = await Promise.all(list(any).map(ready));
+const show = all.every(Boolean) && (some.length === 0 || some.some(Boolean));
+---
+
+{show && <slot />}

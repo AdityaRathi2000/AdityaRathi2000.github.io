@@ -55,6 +55,11 @@ h3 {
   letter-spacing: -0.015em;
 }
 
+h1,
+h2 {
+  font-family: var(--font-serif-display);
+}
+
 h1 {
   font-size: var(--step-3);
   letter-spacing: -0.025em;
