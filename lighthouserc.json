@@ -42,7 +42,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0,
+                "maxNumericValue": 0.025,
                 "aggregationMethod": "median-run"
               }
             ],
@@ -87,7 +87,7 @@
             "cumulative-layout-shift": [
               "error",
               {
-                "maxNumericValue": 0,
+                "maxNumericValue": 0.025,
                 "aggregationMethod": "median-run"
               }
             ],

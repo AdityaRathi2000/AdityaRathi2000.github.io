@@ -51,4 +51,18 @@ Every PR into `redesign` is checked against this list. Source: plan §4 (agent-s
   hero coordinates and no hatching in two thumbnails → **13.3 KB, 1.655 s**. Aditya accepted 1.65 s; the budget in
   `lighthouserc.json` is 1.7 s for `/` only. **Keep the home HTML under about 14 KB gzipped**: new inline SVG on the
   home page should use `THUMB`, and anything that pushes it over will cost a round trip. Text pages measure 1.35 s.
+- **Layout shift: matched font fallbacks, CI budget 0.025, decided by Aditya (P4, 2026-10-31).** On a slow first visit
+  Piazzolla arrives after first paint and `font-display: swap` reflowed the text: throttled phone (412 px, 150 ms,
+  1.6 Mbps) home CLS 0.038, colophon 0.139 (Google's "poor" is over 0.1). Fix: `@font-face` fallbacks over local
+  Georgia, Times New Roman / Liberation Serif (metric-compatible) and Noto Serif (`src/styles/fonts.css`). `size-adjust`
+  is measured in Chromium at body sizes against Piazzolla, roman and italic separately: Piazzolla's optical-size axis
+  changes its width with size, so capsize's single average-width figure was ~1.5 % off for roman and reusing roman
+  values left italics 9-11 % wide. Georgia (not installed where measured) is capsize's ratio times Piazzolla's measured
+  drift; its italic face uses Times New Roman Italic. Result: matched faces within about ±3 % of Piazzolla at 18-20 px;
+  throttled CLS home 0.0003, diagrams 0.0002, colophon 0.020. The colophon residual does not move with `size-adjust`:
+  the local fallback face finishes loading at the same moment as Piazzolla, so those lines first paint in an unmatched
+  face. A swap cannot be guaranteed to move nothing, so the plan's CLS 0 became 0.025 in `lighthouserc.json`;
+  `tests/e2e/layout-shift.spec.ts` forces the slow-network case on every route with the same budget (it fails on the
+  old stack). Rejected: `font-display: optional` (CLS 0, but a slow first visit would not show Piazzolla); loosening
+  the budget without the fix. Re-measure the fallbacks if the font files change.
 - **Accepted advisory: `extract-zip` ≤ 2.0.1 (2 high, no patched release), accepted by Aditya 2026-10-26.** Reached only through `@lhci/cli > lighthouse > puppeteer-core > @puppeteer/browsers`, which uses it to unpack a downloaded browser archive. Lighthouse CI here always runs against an installed Chrome, so that path never executes, and the package is a dev dependency that never ships. `tmp`, `uuid`, `basic-ftp` and `zod` advisories from the same tree are fixed with `pnpm.overrides` in package.json. The weekly workflow prints `pnpm audit` so a fix shows up; drop the override block when upstream catches up.
