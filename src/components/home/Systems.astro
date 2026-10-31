@@ -3,8 +3,8 @@
   Selected systems (plan P4.T3): five rows in a fixed order, each with its own thumbnail,
   a headline of seven words at most, exactly one number from the registry (with its margin
   note), and the "believed" answer from the case study's What I got wrong, read from the
-  case-study frontmatter so it is written in one place. Rows link to their case studies once
-  those pages exist (phase 5); until then they carry no link, so no link is ever broken.
+  case-study frontmatter so it is written in one place. A row links to its case study when
+  that study is published (src/pages/work/[slug].astro builds exactly the published ones).
 */
 import { getEntry } from "astro:content";
 import Metric from "../Metric.astro";
@@ -29,7 +29,7 @@ const withWrong = await Promise.all(
     if (!study) throw new Error(`Systems: no case study "${r.slug}"`);
     if (r.headline.split(/\s+/).length > 7) throw new Error(`Systems: headline over seven words: "${r.headline}"`);
     const believed = study.data.what_i_got_wrong.find((w) => w.prompt === "believed")?.answer.trim();
-    return { ...r, believed: believed ? believed.charAt(0).toLowerCase() + believed.slice(1) : null };
+    return { ...r, href: study.data.status === "published" ? `/work/${r.slug}/` : null, believed: believed ? believed.charAt(0).toLowerCase() + believed.slice(1) : null };
   }),
 );
 ---
@@ -37,13 +37,13 @@ const withWrong = await Promise.all(
 <section id="work" class="systems" aria-labelledby="systems-title">
   <h2 id="systems-title">Selected systems</h2>
   {
-    withWrong.map(({ slug, headline, Thumb, before, metric, after, believed }) => (
+    withWrong.map(({ slug, headline, Thumb, before, metric, after, believed, href }) => (
       <article class="system-row" data-system={slug} aria-labelledby={`row-${slug}`}>
         <div class="system-thumb">
           <Thumb />
         </div>
         <div class="system-body">
-          <h3 id={`row-${slug}`}>{headline}</h3>
+          <h3 id={`row-${slug}`}>{href ? <a href={href}>{headline}</a> : headline}</h3>
           <p class="metric-line">
             {before}<Metric id={metric} />{after}
           </p>
@@ -89,6 +89,17 @@ const withWrong = await Promise.all(
     display: grid;
     gap: var(--space-2xs);
     max-width: 56ch;
+  }
+
+  .system-body h3 a {
+    color: var(--ink);
+    text-decoration-color: var(--ink-2);
+    text-underline-offset: 0.18em;
+  }
+
+  .system-body h3 a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
   }
 
   .metric-line {

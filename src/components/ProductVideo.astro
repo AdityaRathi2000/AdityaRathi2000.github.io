@@ -1,0 +1,48 @@
+---
+/*
+  Manifold's 30-second product teaser (plan P5.T2): real product footage, re-encoded to 720p
+  H.264 with no audio track (~0.5 MB), shown with a poster. Never autoplays and has no sound
+  (veto); nothing downloads until the reader presses play (preload="none").
+  The teaser's on-screen scores are the model's confidence on one demo photo, not an accuracy
+  figure, and the caption says so: the site's measured numbers live in the metrics registry.
+*/
+---
+
+<figure class="product-video">
+  <video
+    src="/media/manifold-teaser.mp4"
+    poster="/media/manifold-teaser-poster.webp"
+    width="1280"
+    height="720"
+    controls
+    muted
+    playsinline
+    preload="none"
+    aria-describedby="manifold-video-caption"
+  ></video>
+  <figcaption id="manifold-video-caption">
+    The product teaser: a site photo goes in, a trade and phase come out. The scores on screen are the model's confidence on
+    one demo photo, not a measured accuracy. No sound.
+  </figcaption>
+</figure>
+
+<style>
+  .product-video {
+    margin: var(--space-l) 0;
+  }
+
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-s);
+    background: var(--paper-2);
+  }
+
+  figcaption {
+    margin-top: var(--space-xs);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+</style>

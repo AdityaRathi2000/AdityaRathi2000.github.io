@@ -103,3 +103,39 @@
   descent-override: 34.39%;
   line-gap-override: 0%;
 }
+
+/*
+  Display fallbacks for h1 and h2 (P5, 2026-10-31): at 29 px and up Piazzolla's optical size is
+  at its narrowest (opsz 30) and headings are weight 500, so the body values above leave a
+  heading's fallback about 3.5 % too wide and it can wrap an extra line, then jump when Piazzolla
+  arrives (measured: Manifold's title, 38 px shift). Measured in Chromium at weight 500, 29-72 px,
+  eight site headings: Times/Liberation 104.52 %, Noto 87.77 %; Georgia is capsize's 99.82 %
+  times Piazzolla's measured display drift (0.9514). Upright only: headings are never italic.
+*/
+@font-face {
+  font-family: "Piazzolla Display Georgia";
+  font-style: normal;
+  src: local("Georgia");
+  size-adjust: 94.97%;
+  ascent-override: 116.88%;
+  descent-override: 32.64%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Piazzolla Display Times";
+  font-style: normal;
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif");
+  size-adjust: 104.52%;
+  ascent-override: 106.20%;
+  descent-override: 29.66%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Piazzolla Display Noto";
+  font-style: normal;
+  src: local("Noto Serif"), local("NotoSerif-Regular");
+  size-adjust: 87.77%;
+  ascent-override: 126.47%;
+  descent-override: 35.32%;
+  line-gap-override: 0%;
+}

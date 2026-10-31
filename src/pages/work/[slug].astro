@@ -1,0 +1,23 @@
+---
+// One page per published case study (plan P5.T2), in the frontmatter's `order`.
+import { getCollection, render } from "astro:content";
+import CaseStudy from "../../layouts/CaseStudy.astro";
+import Metric from "../../components/Metric.astro";
+import ProductVideo from "../../components/ProductVideo.astro";
+import WhenReady from "../../components/WhenReady.astro";
+
+export async function getStaticPaths() {
+  const studies = (await getCollection("caseStudies", (c) => c.data.status === "published")).sort((a, b) => a.data.order - b.data.order);
+  return studies.map((study, i) => ({
+    params: { slug: study.id },
+    props: { study, prev: studies[i - 1] ?? null, next: studies[i + 1] ?? null },
+  }));
+}
+
+const { study, prev, next } = Astro.props;
+const { Content } = await render(study);
+---
+
+<CaseStudy study={study} prev={prev} next={next}>
+  <Content components={{ Metric, WhenReady, ProductVideo }} />
+</CaseStudy>

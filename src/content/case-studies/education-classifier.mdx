@@ -36,6 +36,11 @@ There were no labels at the start, the cost is counted per million records, and 
 
 Domain-specialised models with selective prediction: each model answers only when it is confident enough and holds the rest back. Task-adaptive fine-tuning replaced a frozen encoder. The models ship through CI/CD, and drift in the incoming records triggers retraining.
 
+{/* Both results cite draft numbers; each sentence, and the heading, appear when their rows are ready. */}
+<WhenReady any="edu-accuracy edu-taft-f1-lift">
+
 ## Result
 
-On the <Metric id="edu-us-slice" /> US slice the models reach <Metric id="edu-accuracy" /> accuracy at <Metric id="edu-coverage" /> coverage. Task-adaptive fine-tuning added <Metric id="edu-taft-f1-lift" /> F1 over the frozen encoder.
+<WhenReady ids="edu-accuracy edu-coverage">On the <Metric id="edu-us-slice" /> US slice the models reach <Metric id="edu-accuracy" /> accuracy at <Metric id="edu-coverage" /> coverage. </WhenReady><WhenReady ids="edu-taft-f1-lift">Task-adaptive fine-tuning added <Metric id="edu-taft-f1-lift" /> F1 over the frozen encoder.</WhenReady>
+
+</WhenReady>

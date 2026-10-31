@@ -41,7 +41,7 @@ A fixed GPU budget, a throughput target, and a small labelling budget.
 
 **Serving.** I built the serving path on RTX 5090s: FP8 quantisation, FlashAttention-2 and minimal-padding batching.
 
-**Extraction.** A cascade in three tiers: rules first, then a fine-tuned encoder, then an LLM for what the first two leave. The encoder is a ModernBERT NER model trained by teacher-student distillation: an LLM teacher labelled a weak-supervision-stratified sample of postings, and the smaller student learned from those labels. It segments each posting into <Metric id="ner-section-types" /> section types (education, experience, skills, certifications, responsibilities and more). Interns labelled a gold set and I checked it; the model reaches <Metric id="ner-f1" /> against it.
+**Extraction.** A cascade in three tiers: rules first, then a fine-tuned encoder, then an LLM for what the first two leave. The encoder is a ModernBERT NER model trained by teacher-student distillation: an LLM teacher labelled a weak-supervision-stratified sample of postings, and the smaller student learned from those labels. It segments each posting into <Metric id="ner-section-types" /> section types (education, experience, skills, certifications, responsibilities and more). Interns labelled a gold set and I checked it.<WhenReady ids="ner-f1"> The model reaches <Metric id="ner-f1" /> against it.</WhenReady>
 
 **Education predictions.** I built the education classifiers that read the extracted sections.
 
