@@ -16,7 +16,8 @@ const standalone = (text: string) =>
     .filter((s) => !/^Below\b/.test(s))
     .join(" ");
 
-const span = (start: string | null, end: string | null) => {
+// "Jun 2023 to present", "2022", "May 2023": shared by resume.md and the home timeline.
+export const span = (start: string | null, end: string | null) => {
   const a = start ? formatAsOf(start) : null;
   const b = end ? formatAsOf(end) : "present";
   if (!a) return b;

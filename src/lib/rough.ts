@@ -44,10 +44,28 @@ const FILL_SENTINEL = "#00f111";
 
 // Rough.js emits 15-digit coordinates; a tenth of a unit is invisible at any size we draw,
 // and rounding cuts the inline SVG to well under half its size (LCP on text-first pages).
-const compact = (d: string) => d.replace(/-?\d+\.\d+/g, (n) => String(Math.round(Number(n) * 10) / 10));
+const round = (decimals: number) => {
+  const f = 10 ** decimals;
+  return (d: string) => d.replace(/-?\d+\.\d+/g, (n) => String(Math.round(Number(n) * f) / f));
+};
 
-export function sketch(seed: number) {
+export interface SketchStyle {
+  /** Rough.js draws each stroke twice by default; one pass halves the path data. */
+  singleStroke?: boolean;
+  /** Decimals kept in coordinates (default 1). Small figures lose nothing at 0. */
+  precision?: number;
+}
+
+/**
+ * Small inline figures (row thumbnails): one stroke per line and whole-unit coordinates.
+ * The home page's HTML must stay near TCP's first round trip (about 14 KB gzipped), where
+ * every kilobyte of path data costs page load (measured in P4: 21 KB -> 1.80 s LCP).
+ */
+export const THUMB: SketchStyle = { singleStroke: true, precision: 0 };
+
+export function sketch(seed: number, style: SketchStyle = {}) {
   const gen = rough.generator();
+  const compact = round(style.precision ?? 1);
   let next = seed;
 
   function opts(o: ShapeOpts): Options {
@@ -57,6 +75,8 @@ export function sketch(seed: number) {
       strokeWidth: o.width ?? BASE.strokeWidth,
       roughness: o.roughness ?? BASE.roughness,
       fill: o.hachure ? FILL_SENTINEL : undefined,
+      disableMultiStroke: !!style.singleStroke,
+      disableMultiStrokeFill: !!style.singleStroke,
     };
   }
 

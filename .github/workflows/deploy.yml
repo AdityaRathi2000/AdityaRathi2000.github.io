@@ -18,6 +18,8 @@ concurrency:
 
 env:
   ASTRO_TELEMETRY_DISABLED: "1"
+  # GoatCounter account code (repository variable); analytics stay off while it is unset.
+  PUBLIC_GOATCOUNTER_CODE: ${{ vars.GOATCOUNTER_CODE }}
 
 jobs:
   build:

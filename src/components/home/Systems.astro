@@ -1,0 +1,128 @@
+---
+/*
+  Selected systems (plan P4.T3): five rows in a fixed order, each with its own thumbnail,
+  a headline of seven words at most, exactly one number from the registry (with its margin
+  note), and the "believed" answer from the case study's What I got wrong, read from the
+  case-study frontmatter so it is written in one place. Rows link to their case studies once
+  those pages exist (phase 5); until then they carry no link, so no link is ever broken.
+*/
+import { getEntry } from "astro:content";
+import Metric from "../Metric.astro";
+import MetricNote from "../MetricNote.astro";
+import CviThumb from "../thumbs/CviThumb.astro";
+import KalshiThumb from "../thumbs/KalshiThumb.astro";
+import ManifoldThumb from "../thumbs/ManifoldThumb.astro";
+import PostingsThumb from "../thumbs/PostingsThumb.astro";
+import RiskCoverageThumb from "../thumbs/RiskCoverageThumb.astro";
+
+const rows = [
+  { slug: "cvi-entity-resolution", headline: "Entity resolution for the Credential Value Index", Thumb: CviThumb, before: "", metric: "cvi-providers", after: " canonical providers in the July 2026 release." },
+  { slug: "postings-extraction-stack", headline: "A postings stack, pretraining to predictions", Thumb: PostingsThumb, before: "", metric: "edu-predictions", after: " education predictions shipped." },
+  { slug: "education-classifier", headline: "An education classifier that abstains when unsure", Thumb: RiskCoverageThumb, before: "", metric: "edu-records", after: " unlabelled records classified." },
+  { slug: "kalshi-weather-model", headline: "A weather model judged by its forecasts", Thumb: KalshiThumb, before: "Daily-high forecasts for ", metric: "kalshi-cities", after: " US cities, scored on calibration." },
+  { slug: "manifold", headline: "Manifold, a paid API for site photos", Thumb: ManifoldThumb, before: "", metric: "manifold-latency", after: " median per photo." },
+];
+
+const withWrong = await Promise.all(
+  rows.map(async (r) => {
+    const study = await getEntry("caseStudies", r.slug);
+    if (!study) throw new Error(`Systems: no case study "${r.slug}"`);
+    if (r.headline.split(/\s+/).length > 7) throw new Error(`Systems: headline over seven words: "${r.headline}"`);
+    const believed = study.data.what_i_got_wrong.find((w) => w.prompt === "believed")?.answer.trim();
+    return { ...r, believed: believed ? believed.charAt(0).toLowerCase() + believed.slice(1) : null };
+  }),
+);
+---
+
+<section id="work" class="systems" aria-labelledby="systems-title">
+  <h2 id="systems-title">Selected systems</h2>
+  {
+    withWrong.map(({ slug, headline, Thumb, before, metric, after, believed }) => (
+      <article class="system-row" data-system={slug} aria-labelledby={`row-${slug}`}>
+        <div class="system-thumb">
+          <Thumb />
+        </div>
+        <div class="system-body">
+          <h3 id={`row-${slug}`}>{headline}</h3>
+          <p class="metric-line">
+            {before}<Metric id={metric} />{after}
+          </p>
+          {believed && (
+            <p class="wrong">
+              <em>What I got wrong:</em> I believed {believed}
+            </p>
+          )}
+        </div>
+        <MetricNote id={metric} />
+      </article>
+    ))
+  }
+</section>
+
+<style>
+  .systems {
+    padding-block: var(--space-xl);
+  }
+
+  .systems h2 {
+    margin-bottom: var(--space-l);
+  }
+
+  .system-row {
+    display: grid;
+    gap: var(--space-s) var(--space-l);
+    align-items: start;
+    padding-block: var(--space-m);
+    border-top: 1px solid color-mix(in srgb, var(--ink-2) 35%, transparent);
+  }
+
+  .system-thumb {
+    max-width: 14rem;
+  }
+
+  .system-thumb :global(svg) {
+    width: 100%;
+    height: auto;
+  }
+
+  .system-body {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: 56ch;
+  }
+
+  .metric-line {
+    font-size: var(--step-1);
+    line-height: 1.35;
+  }
+
+  .wrong {
+    color: var(--ink-2);
+  }
+
+  .wrong em {
+    color: var(--ink);
+  }
+
+  @media (min-width: 760px) {
+    .system-row {
+      grid-template-columns: 13rem minmax(0, 1fr);
+    }
+
+    .system-row > :global(.margin-note) {
+      grid-column: 2;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .system-row {
+      grid-template-columns: 13rem minmax(0, 1fr) 15rem;
+    }
+
+    .system-row > :global(.margin-note) {
+      grid-column: 3;
+      grid-row: 1;
+      padding-top: var(--space-2xs);
+    }
+  }
+</style>

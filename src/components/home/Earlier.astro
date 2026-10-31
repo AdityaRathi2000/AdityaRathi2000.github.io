@@ -1,0 +1,76 @@
+---
+/*
+  Earlier work and the timeline (plan P4.T4): Sophos and BrainAI in a line each, then every
+  role in date order. All from src/content/roles/*.yaml; numbers only through <Metric>.
+*/
+import { getCollection, getEntry } from "astro:content";
+import { span } from "../../lib/plain-profile";
+import Metric from "../Metric.astro";
+
+const sophos = (await getEntry("roles", "sophos"))!.data;
+const roles = (await getCollection("roles")).sort((a, b) => String(b.data.end ?? "9999").localeCompare(String(a.data.end ?? "9999")));
+const lead = (r: (typeof roles)[number]["data"]) => (r.kind === "education" ? r.title : `${r.title}, ${r.org}`);
+---
+
+<section class="earlier" aria-labelledby="earlier-title">
+  <h2 id="earlier-title">Earlier</h2>
+  <p>
+    <strong>{sophos.org}, 2022.</strong> Learned text features for a security alert-prioritisation system, shipped to production.
+  </p>
+  <p>
+    <strong>BrainAI, 2022 course project.</strong> Identifying people from EEG and ECG signals, with an F1 of <Metric id="brainai-f1" />.
+  </p>
+
+  <h2 id="timeline-title">Timeline</h2>
+  <ol class="timeline" aria-labelledby="timeline-title">
+    {
+      roles
+        .filter((r) => r.data.kind !== "project")
+        .map((r) => (
+          <li>
+            <span class="when">{span(r.data.start, r.data.end)}</span>
+            <span>
+              {lead(r.data)}
+              {r.data.kind === "education" ? `, ${r.data.org}` : ""}
+            </span>
+          </li>
+        ))
+    }
+  </ol>
+</section>
+
+<style>
+  .earlier {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--measure);
+    padding-block: var(--space-xl) 0;
+  }
+
+  .earlier h2:not(:first-child) {
+    margin-top: var(--space-l);
+  }
+
+  .timeline {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .timeline li {
+    display: grid;
+    gap: 0 var(--space-m);
+  }
+
+  .when {
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 640px) {
+    .timeline li {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+  }
+</style>

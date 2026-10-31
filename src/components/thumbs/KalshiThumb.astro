@@ -2,15 +2,17 @@
 /*
   Row thumbnail for the weather model: a probability for each temperature bracket of one
   day's high. A pictogram of what the model outputs; the bar heights are not data.
-  The live reliability diagram replaces this in P4.T3 once the feed exists (P7).
+  Plan P4.T3 asks for a mini reliability diagram from a fixture here; Aditya chose
+  (2026-10-30) to keep this pictogram until the live feed (P7), because a curve drawn from
+  a fixture would read as a real calibration result. The real diagram replaces it then.
 */
-import { sketch } from "../../lib/rough";
+import { sketch, THUMB } from "../../lib/rough";
 import RoughPaths from "../RoughPaths.astro";
 
-const s = sketch(3103);
+const s = sketch(3103, THUMB);
 
 const heights = [10, 26, 52, 84, 62, 30, 12];
-const bars = heights.flatMap((h, i) => s.rect(36 + i * 24, 128 - h, 18, h, i === 3 ? { tone: "accent", width: 1.6, roughness: 0.7 } : { hachure: true, width: 1, roughness: 0.7 }));
+const bars = heights.flatMap((h, i) => s.rect(36 + i * 24, 128 - h, 18, h, i === 3 ? { tone: "accent", width: 1.6, roughness: 0.7 } : { width: 1.1, roughness: 0.7 }));
 const axis = s.line(28, 129, 208, 129, { width: 1.2 });
 const frame = s.rect(4, 2, 220, 158, { width: 1.1, roughness: 0.9 });
 ---

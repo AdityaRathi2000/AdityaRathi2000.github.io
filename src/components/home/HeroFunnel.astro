@@ -1,0 +1,127 @@
+---
+/*
+  Home hero figure (plan P4.T2): entity resolution on one fictional provider, drawn with
+  build-time Rough.js. Server-rendered fully assembled, which is what visitors without JS,
+  with reduced motion, or printing see. With motion allowed, Base.astro's head script adds
+  html.hero-motion before first paint: the CSS below then shows stage 0 (scattered, nothing
+  judged yet), and src/scripts/hero-funnel.ts takes over and scrubs the stages with scroll.
+  Geometry and stage maths live in src/lib/hero-funnel.ts, shared with the driver.
+  Synthetic data, real mechanism: dashed frame and caption are required (veto V2).
+*/
+import { CANONICAL, CARDS, CARD_H, H, PAD, W } from "../../lib/hero-funnel";
+import { sketch } from "../../lib/rough";
+import RoughPaths from "../RoughPaths.astro";
+
+// Whole-unit coordinates (about a pixel at hero size); the double stroke stays. See THUMB in rough.ts.
+const s = sketch(20261026, { precision: 0 });
+const byId = Object.fromEntries(CARDS.map((c) => [c.id, c]));
+const centre = (id: string): [number, number] => [byId[id].x + byId[id].w / 2, byId[id].y + CARD_H / 2];
+
+const block = s.rect(0, 2, W, 262, { hachure: true, tone: "muted", width: 1 });
+const link = (a: string, b: string, o = {}) => s.line(...centre(a), ...centre(b), { width: 1.1, ...o });
+const links = [
+  ...link("c1", "c2"),
+  ...link("c1", "c4"),
+  ...link("c2", "c3"),
+  ...link("c4", "c5", { tone: "accent", width: 1.8 }),
+  ...link("c5", "c6", { tone: "muted", dash: [5, 5] }),
+];
+const tick = (x: number, y: number, tone?: "accent") => s.path(`M${x - 6} ${y} L${x - 1.5} ${y + 5} L${x + 7} ${y - 6}`, { width: 1.6, roughness: 0.6, tone });
+const cross = (x: number, y: number) => [
+  ...s.line(x - 5, y - 5, x + 5, y + 5, { width: 1.6, roughness: 0.6 }),
+  ...s.line(x + 5, y - 5, x - 5, y + 5, { width: 1.6, roughness: 0.6 }),
+];
+const marks = [tick(255, 33), tick(136, 85), tick(344, 93), tick(134, 177, "accent"), cross(236, 214)];
+const cards = CARDS.map((c) => ({ c, outline: s.rect(c.x, c.y, c.w, CARD_H, { width: 1.2 }) }));
+const arrow = [...s.line(210, 272, 210, 336, { width: 1.3 }), ...s.path("M202 326 L210 338 L218 326", { width: 1.3, roughness: 0.7 })];
+const { x: kx, y: ky, w: kw, h: kh } = CANONICAL;
+const canonical = [...s.rect(kx, ky, kw, kh, { width: 1.4 }), ...s.rect(kx - 4, ky - 4, kw + 8, kh + 8, { width: 0.9, roughness: 1.6 })];
+const frame = s.rect(-PAD + 3, -PAD + 3, W + 2 * PAD - 6, H + 2 * PAD - 6, { tone: "muted", dash: [7, 6], width: 1.1, roughness: 0.8 });
+---
+
+<svg class="rough hero-funnel" data-hero-funnel viewBox={`${-PAD} ${-PAD} ${W + 2 * PAD} ${H + 2 * PAD}`} role="img" aria-labelledby="hf-title hf-desc">
+  <title id="hf-title">Entity resolution on one fictional provider</title>
+  <desc id="hf-desc">
+    Six records from different sources name the same college in different ways, and a bookstore has a similar name.
+    All six share one blocking key. Candidate links between them are judged: close calls are accepted by an LLM, and the
+    link to the bookstore is rejected. The five matching records merge into one canonical provider, Larkspur Technical
+    College.
+  </desc>
+  <RoughPaths paths={frame} />
+  <g data-el="block">
+    <RoughPaths paths={block} />
+    <text class="r-note" x="4" y="292" font-size="15">one shared blocking key</text>
+  </g>
+  <g data-el="judged">
+    <g data-el="links"><RoughPaths paths={links} /></g>
+  </g>
+  {
+    cards.map(({ c, outline }) => (
+      <g class="hf-card" data-card={c.id} style={`--sx: ${c.scatter[0]}px; --sy: ${c.scatter[1]}px; --sr: ${c.scatter[2]}deg`}>
+        <g transform={`rotate(${c.rot} ${c.x + c.w / 2} ${c.y + CARD_H / 2})`}>
+          <rect class="r-solid" x={c.x} y={c.y} width={c.w} height={CARD_H} />
+          <RoughPaths paths={outline} />
+          <text x={c.x + c.w / 2} y={c.y + CARD_H / 2 + 5} text-anchor="middle" font-size="15">
+            {c.label}
+          </text>
+        </g>
+      </g>
+    ))
+  }
+  <g data-el="marks">
+    {
+      marks.map((m, i) => (
+        <g data-mark={i}>
+          <RoughPaths paths={m} />
+        </g>
+      ))
+    }
+    <g data-el="llm-note"><text class="r-note" x="224" y="292" font-size="15">close calls go to an LLM</text></g>
+  </g>
+  <g data-el="merge">
+    <RoughPaths paths={arrow} />
+    <rect class="r-solid" x={kx} y={ky} width={kw} height={kh} />
+    <RoughPaths paths={canonical} />
+    <text x={kx + kw / 2} y={ky + 31} text-anchor="middle" font-size="17" font-weight="500">Larkspur Technical College</text>
+    <text class="r-note" x={kx + kw / 2} y="428" text-anchor="middle" font-size="15">one canonical provider</text>
+  </g>
+</svg>
+
+<style is:global>
+  .hero-funnel .hf-card {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* Stage 0 before the driver loads (same values as frameAt(0)); the driver then sets inline styles. */
+  @media screen {
+    .hero-motion .hero-funnel .hf-card {
+      transform: translate(var(--sx), var(--sy)) rotate(var(--sr));
+    }
+
+    .hero-motion .hero-funnel :is([data-el="block"], [data-mark], [data-el="llm-note"], [data-el="merge"]) {
+      opacity: 0;
+    }
+
+    .hero-motion .hero-funnel [data-el="links"] {
+      opacity: 0;
+    }
+
+    .hero-motion .hero-funnel [data-el="links"] .r-draw {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* Print shows the assembled frame whatever the scroll position was. */
+  @media print {
+    .hero-funnel :is(.hf-card, [data-el], [data-mark]) {
+      transform: none !important;
+      opacity: 1 !important;
+    }
+
+    .hero-funnel [data-el="links"] .r-draw {
+      stroke-dashoffset: 0 !important;
+    }
+  }
+</style>

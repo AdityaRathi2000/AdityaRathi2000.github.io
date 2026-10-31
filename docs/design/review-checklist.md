@@ -43,5 +43,12 @@ Every PR into `redesign` is checked against this list. Source: plan §4 (agent-s
 
 ## Known risks (measured)
 
-- **LCP headroom is thin (P1, 2026-10-26).** Lighthouse mobile simulation on a text-only page: LCP 1.35 s against the 1.5 s budget (TTFB 0.45 s + render delay 0.9 s, mostly font bytes). The style tile, which adds the hero figure's italic annotations, measured 1.65 s: the Piazzolla italic file (55 KB) competes with the roman. Weight-only Piazzolla files (32 + 33 KB, no optical-size axis) brought it to 1.50 s; subsetting saves only ~11 %; inlining the 2.7 KB stylesheet made no measurable difference. Decide in P4 before the hero ships: drop the Plex Mono preload, load the italic with `font-display: optional`, or switch to weight-only files. `/tiles/` is excluded from Lighthouse CI for this reason; it is a noindex design reference removed in P4.
+- **Home LCP budget is 1.7 s, decided by Aditya (P4, 2026-10-30); every other page stays at 1.5 s.** Measured with
+  Lighthouse mobile simulation, median of 3: the home page's LCP element is the hero paragraph (plain text), and its cost
+  is the HTML size, not fonts. TCP's first round trip carries about 14 KB; above that the simulated 150 ms RTT adds a
+  second. HTML 21.3 KB gzipped → 1.80 s; italic as `font-display: optional` → 1.80 s (no effect, not adopted); without
+  the five rows (11.1 KB) → 1.65 s; single-stroke whole-unit thumbnails (`THUMB` in `src/lib/rough.ts`), whole-unit
+  hero coordinates and no hatching in two thumbnails → **13.3 KB, 1.655 s**. Aditya accepted 1.65 s; the budget in
+  `lighthouserc.json` is 1.7 s for `/` only. **Keep the home HTML under about 14 KB gzipped**: new inline SVG on the
+  home page should use `THUMB`, and anything that pushes it over will cost a round trip. Text pages measure 1.35 s.
 - **Accepted advisory: `extract-zip` ≤ 2.0.1 (2 high, no patched release), accepted by Aditya 2026-10-26.** Reached only through `@lhci/cli > lighthouse > puppeteer-core > @puppeteer/browsers`, which uses it to unpack a downloaded browser archive. Lighthouse CI here always runs against an installed Chrome, so that path never executes, and the package is a dev dependency that never ships. `tmp`, `uuid`, `basic-ftp` and `zod` advisories from the same tree are fixed with `pnpm.overrides` in package.json. The weekly workflow prints `pnpm audit` so a fix shows up; drop the override block when upstream catches up.
