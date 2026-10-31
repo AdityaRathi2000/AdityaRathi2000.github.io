@@ -16,6 +16,7 @@
 //     record (name, town, state), not just the score, and makes the mistakes such a reader
 //     makes (a branch campus listed without its campus name looks like the parent).
 import { writeFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 
 export const SEED = 20261031;
 export const VERSION = 1;
@@ -292,7 +293,8 @@ export function makeSample(seed = SEED) {
 
 export const serialise = (sample) => JSON.stringify(sample) + "\n";
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run as a script (pathToFileURL: the module URL is percent-encoded, a raw argv path is not).
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const s = makeSample();
   writeFileSync("public/data/er-sample.json", serialise(s));
   console.log(`er-sample.json: ${s.records.length} records, ${s.pairs.length} stored pairs, ${new Set(s.truth.cluster_of).size} organisations (${s.truth.business_clusters.length} of them businesses).`);

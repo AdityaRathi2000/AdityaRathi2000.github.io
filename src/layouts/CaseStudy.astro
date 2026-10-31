@@ -9,6 +9,7 @@ import { getEntry, type CollectionEntry } from "astro:content";
 import Base from "./Base.astro";
 import Diagram from "../components/Diagram.astro";
 import ErExplorer from "../components/er/ErExplorer.astro";
+import KalshiResult from "../components/kalshi/KalshiResult.astro";
 import Metric from "../components/Metric.astro";
 import MetricNote from "../components/MetricNote.astro";
 
@@ -74,6 +75,7 @@ const noteLabel: Record<string, string> = { reruns: "Reruns", cost: "Cost", line
     </div>
 
     {d.interactive === "er-funnel" && <ErExplorer />}
+    {d.interactive === "kalshi-reliability" && <KalshiResult />}
 
     <section class="wrong" aria-labelledby="wrong-title">
       <h2 id="wrong-title">What I got wrong</h2>

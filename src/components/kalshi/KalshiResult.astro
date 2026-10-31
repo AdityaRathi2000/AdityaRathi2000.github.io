@@ -1,0 +1,23 @@
+---
+/*
+  The weather model's Result section on its case-study page (plan P6.T2 / P7). Renders only a
+  live export, src/data/kalshi/reliability.json, which phase 7 delivers at build time. Until
+  then the file does not exist and this renders nothing: the fixture is shown only on the
+  noindex /diagrams/ page (Aditya, 2026-10-31). A fixture placed at the live path fails the build.
+*/
+import { liveOnly, parseReliability } from "../../lib/kalshi-reliability";
+import Reliability from "./Reliability.astro";
+
+const files = import.meta.glob<{ default: unknown }>("../../data/kalshi/reliability.json", { eager: true });
+const raw = Object.values(files)[0]?.default;
+const parsed = raw === undefined ? null : liveOnly(parseReliability(raw, new Date()));
+---
+
+{
+  parsed && (
+    <section class="kalshi-result" aria-labelledby="kalshi-result-title">
+      <h2 id="kalshi-result-title">Result</h2>
+      <Reliability data={parsed.data} stale={parsed.stale} />
+    </section>
+  )
+}

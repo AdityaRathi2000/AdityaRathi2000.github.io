@@ -1,0 +1,254 @@
+---
+/*
+  Reliability chart for the weather model (plan P6.T2): CORP curve with its block-bootstrap
+  band, the forecast-count histogram beneath, the SmoothECE badge, and scores with intervals.
+  Static SVG at build time: no client JS, no fetch. Takes data that has already passed
+  parseReliability (src/lib/kalshi-reliability.ts); never pass raw JSON or spread props in.
+  A fixture is unmistakable: dashed frame, a tag, and a watermark across the plot, because a
+  curve from made-up numbers must never read as a real calibration result (Aditya, 2026-10-30).
+*/
+import { CHART, HIST_TOP, PLOT_BOTTOM, VIEW_H, bandPath, curvePath, histBars, sx, sy, withCi, type ReliabilityData } from "../../lib/kalshi-reliability";
+import { formatAsOf } from "../../lib/metrics";
+
+interface Props {
+  data: ReliabilityData;
+  stale: boolean;
+}
+
+const { data: d, stale } = Astro.props;
+const fixture = d.provenance === "fixture";
+const id = `kr-${d.provenance}`;
+const ticks = [0, 0.25, 0.5, 0.75, 1];
+const bars = histBars(d.histogram);
+const count = new Intl.NumberFormat("en-US");
+const pct = (p: number) => `${Math.round(p * 100)}%`;
+const skill = (k: keyof ReliabilityData["skill_vs"]) => withCi(d.skill_vs[k], 2);
+const asOf = new Date(`${d.as_of}T00:00:00Z`).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+---
+
+<div class:list={["kr", { "kr--fixture": fixture }]} data-provenance={d.provenance} data-live={fixture ? undefined : ""}>
+  {fixture && <p class="kr-tag">Fixture: made-up numbers for building this chart, not a result</p>}
+  {stale && <p class="kr-stale">Stale as of {asOf}: this export is more than a week old.</p>}
+
+  <figure class="kr-fig" aria-labelledby={`${id}-cap`}>
+    <svg viewBox={`0 0 ${CHART.w} ${VIEW_H}`} role="img" aria-labelledby={`${id}-title ${id}-desc`}>
+      <title id={`${id}-title`}>Reliability of the forecasts{fixture ? " (fixture, made-up numbers)" : ""}</title>
+      <desc id={`${id}-desc`}>
+        Observed frequency against forecast probability for {count.format(d.n_settled_forecasts)} settled forecasts. The dashed diagonal is
+        perfect calibration; the shaded band is a block-by-date bootstrap interval. Bars below count the forecasts in each
+        probability bin.
+      </desc>
+      {
+        fixture && (
+          <text class="kr-watermark" x={sx(0.5)} y={sy(0.5)} text-anchor="middle" transform={`rotate(-45 ${sx(0.5)} ${sy(0.5)})`}>
+            FIXTURE
+          </text>
+        )
+      }
+      {
+        ticks.map((t) => (
+          <g>
+            <line class="kr-grid" x1={sx(0)} x2={sx(1)} y1={sy(t)} y2={sy(t)} />
+            <line class="kr-grid" x1={sx(t)} x2={sx(t)} y1={sy(0)} y2={sy(1)} />
+            <text class="kr-tick" x={sx(0) - 6} y={sy(t) + 4} text-anchor="end">
+              {pct(t)}
+            </text>
+            <text class="kr-tick" x={sx(t)} y={PLOT_BOTTOM + 16} text-anchor="middle">
+              {pct(t)}
+            </text>
+          </g>
+        ))
+      }
+      <line class="kr-diag" x1={sx(0)} y1={sy(0)} x2={sx(1)} y2={sy(1)} />
+      <path class="kr-band" d={bandPath(d.corp_curve)} />
+      <path class="kr-curve" d={curvePath(d.corp_curve)} />
+      <text class="kr-axis" x={sx(0.5)} y={HIST_TOP - 2} text-anchor="middle">forecast probability</text>
+      <text class="kr-axis" x="10" y={sy(0.5)} text-anchor="middle" transform={`rotate(-90 10 ${sy(0.5)})`}>observed frequency</text>
+      {
+        bars.map((b) => (
+          <rect class="kr-bar" x={b.x} y={b.y} width={b.w} height={b.hgt}>
+            <title>
+              {count.format(b.count)} forecasts from {pct(b.from)} to {pct(b.to)}
+            </title>
+          </rect>
+        ))
+      }
+      <line class="kr-base" x1={sx(0)} x2={sx(1)} y1={HIST_TOP + CHART.histH} y2={HIST_TOP + CHART.histH} />
+      <text class="kr-axis" x={sx(0.5)} y={HIST_TOP + CHART.histH + 18} text-anchor="middle">forecasts in each bin</text>
+    </svg>
+
+    <figcaption id={`${id}-cap`}>
+      <p>
+        Reliability of <span class="num">{count.format(d.n_settled_forecasts)}</span> settled forecasts over{" "}
+        <span class="num">{count.format(d.city_days)}</span> city-days, {formatAsOf(d.window.start)} to {formatAsOf(d.window.end)}, all cities
+        pooled. The curve is CORP (isotonic regression); the band is a block-by-date bootstrap with{" "}
+        <span class="num">{count.format(d.bootstrap.resamples)}</span> resamples.
+      </p>
+    </figcaption>
+  </figure>
+
+  <div class="kr-numbers">
+    <details class="kr-ece">
+      <summary>
+        <span>SmoothECE</span>
+        <span class="num">{withCi(d.calibration.smooth_ece)}</span>
+        <span class="kr-more">definition</span>
+      </summary>
+      <p>{d.calibration.smooth_ece.definition}</p>
+    </details>
+    <dl>
+      <div><dt>Brier score</dt><dd class="num">{withCi(d.scores.brier)}</dd></div>
+      <div><dt>CRPS</dt><dd class="num">{withCi(d.scores.crps, 2)}</dd></div>
+      <div><dt>Log loss</dt><dd class="num">{withCi(d.scores.log)}</dd></div>
+      <div><dt>CRPS skill vs climatology</dt><dd class="num">{skill("climatology")}</dd></div>
+      <div><dt>CRPS skill vs weather models alone</dt><dd class="num">{skill("nwp_only")}</dd></div>
+      <div><dt>CRPS skill vs market prices</dt><dd class="num">{skill("market_implied")}</dd></div>
+    </dl>
+    <p class="kr-fine">
+      Lower is better for the three scores. Skill is one minus the model's CRPS over the baseline's, so above zero beats the
+      baseline. Promotion gate:{" "}
+      {d.gate_status === "pass" ? "passing" : "failing"}. Model {d.model_version}, data as of {asOf}.
+    </p>
+  </div>
+</div>
+
+<style>
+  .kr-fig {
+    margin: 0;
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .kr {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 40rem;
+  }
+
+  .kr--fixture {
+    border: 1.5px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-m);
+  }
+
+  .kr-tag {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    border: 1px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-3xs) var(--space-2xs);
+  }
+
+  .kr-stale {
+    font-style: italic;
+    color: var(--data);
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .kr-grid {
+    stroke: color-mix(in srgb, var(--ink-2) 22%, transparent);
+    stroke-width: 0.6;
+  }
+
+  .kr-diag {
+    stroke: var(--ink-2);
+    stroke-width: 1;
+    stroke-dasharray: 4 4;
+  }
+
+  .kr-band {
+    fill: var(--accent-wash);
+    stroke: none;
+  }
+
+  .kr-curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  .kr-bar {
+    fill: color-mix(in srgb, var(--ink-2) 45%, transparent);
+  }
+
+  .kr-base {
+    stroke: var(--ink-2);
+    stroke-width: 0.8;
+  }
+
+  .kr-tick,
+  .kr-axis {
+    fill: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .kr-tick {
+    font-family: var(--font-mono);
+  }
+
+  .kr-axis {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 15px;
+  }
+
+  .kr-watermark {
+    fill: color-mix(in srgb, var(--data) 18%, transparent);
+    font-family: var(--font-mono);
+    font-size: 54px;
+    letter-spacing: 0.12em;
+  }
+
+  figcaption {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .kr-numbers {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .kr-ece summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    cursor: pointer;
+  }
+
+  .kr-more {
+    color: var(--accent);
+    font-size: var(--step--1);
+    text-decoration: underline dotted;
+    text-underline-offset: 0.2em;
+  }
+
+  .kr-ece p {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+    margin-top: var(--space-2xs);
+  }
+
+  .kr-numbers dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: var(--space-xs) var(--space-m);
+  }
+
+  .kr-numbers dt {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .kr-fine {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+</style>
