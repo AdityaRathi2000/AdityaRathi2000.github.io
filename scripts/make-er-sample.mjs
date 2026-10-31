@@ -37,6 +37,20 @@ function rng(seed) {
   };
 }
 
+/**
+ * Fisher–Yates with the seeded rng: one draw per position, the same in every engine.
+ * (Never sort(() => r() - 0.5): with an inconsistent comparator the order is engine-defined, and
+ * V8's short-array sort differs between Node 24 and Node 26, which broke the committed sample on CI.)
+ */
+function shuffle(xs, r) {
+  const a = [...xs];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(r() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 const STATES = {
   OH: ["Larkspur", "Fernhollow", "Calder", "Millbrook", "Vantry"],
   PA: ["Ashby", "Brinmoor", "Halden", "Quarry Hill", "Osgood"],
@@ -85,7 +99,7 @@ export function makeWorld(seed = SEED) {
   for (const [state, towns] of Object.entries(STATES)) {
     for (const town of towns) {
       // Two or three providers named after the town, so a shared place name is common.
-      const types = [...PROVIDER_TYPES].sort(() => r() - 0.5).slice(0, 2 + Math.floor(r() * 2));
+      const types = shuffle(PROVIDER_TYPES, r).slice(0, 2 + Math.floor(r() * 2));
       for (const type of types) add({ name: `${town} ${type}`, type, state, town, kind: "provider" });
       // A look-alike that is not a provider at all.
       if (r() < 0.55) add({ name: `${town} ${pick(BUSINESS_TYPES)}`, type: null, state, town, kind: "business" });
@@ -102,7 +116,7 @@ export function makeWorld(seed = SEED) {
   entities.forEach((e, cluster) => {
     // One to five listings; businesses rarely appear more than twice.
     const n = e.kind === "business" ? 1 + (r() < 0.3 ? 1 : 0) : 1 + Math.floor(r() ** 0.85 * 5);
-    const srcs = [...SOURCES].sort(() => r() - 0.5).slice(0, n);
+    const srcs = shuffle(SOURCES, r).slice(0, n);
     srcs.forEach((src, k) => records.push({ name: k === 0 ? e.name : variant(e, r), city: cityFor(e, src, r), state: e.state, src, cluster }));
   });
   return { entities, records };
@@ -293,8 +307,9 @@ export function makeSample(seed = SEED) {
 
 export const serialise = (sample) => JSON.stringify(sample) + "\n";
 
-// Run as a script (pathToFileURL: the module URL is percent-encoded, a raw argv path is not).
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Run as a script (pathToFileURL: the module URL is percent-encoded, a raw argv path is not; argv[1] is
+// undefined under node -e).
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const s = makeSample();
   writeFileSync("public/data/er-sample.json", serialise(s));
   console.log(`er-sample.json: ${s.records.length} records, ${s.pairs.length} stored pairs, ${new Set(s.truth.cluster_of).size} organisations (${s.truth.business_clusters.length} of them businesses).`);

@@ -18,8 +18,9 @@ export function schemaText() {
   return JSON.stringify(schema, null, 2) + "\n";
 }
 
-// Run as a script (pathToFileURL: the module URL is percent-encoded, a raw argv path is not).
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Run as a script (pathToFileURL: the module URL is percent-encoded, a raw argv path is not; argv[1] is
+// undefined under node -e).
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   writeFileSync("schemas/kalshi-reliability.schema.json", schemaText());
   console.log("schemas/kalshi-reliability.schema.json written");
 }
