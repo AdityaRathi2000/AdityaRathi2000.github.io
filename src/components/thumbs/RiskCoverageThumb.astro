@@ -3,10 +3,10 @@
   Row thumbnail for the classifier: the shape of a risk-coverage curve with the operating
   point marked. Illustrative shape, no values on the axes; it sits inside the specimen frame.
 */
-import { sketch } from "../../lib/rough";
+import { sketch, THUMB } from "../../lib/rough";
 import RoughPaths from "../RoughPaths.astro";
 
-const s = sketch(600);
+const s = sketch(600, THUMB);
 
 const axes = [...s.line(28, 14, 28, 132, { width: 1.2 }), ...s.line(28, 132, 212, 132, { width: 1.2 })];
 const curve = s.curve(

@@ -3,10 +3,10 @@
   Row thumbnail for entity resolution: scattered records for one provider, linked and merged
   into a single canonical card. A pictogram of the mechanism; it shows no data.
 */
-import { sketch } from "../../lib/rough";
+import { sketch, THUMB } from "../../lib/rough";
 import RoughPaths from "../RoughPaths.astro";
 
-const s = sketch(3101);
+const s = sketch(3101, THUMB);
 
 const cards: [number, number, number][] = [
   [18, 20, 58],

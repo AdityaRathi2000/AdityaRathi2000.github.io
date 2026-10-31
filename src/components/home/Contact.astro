@@ -1,0 +1,93 @@
+---
+/*
+  Contact (plan P4.T4). The email address is never in the HTML as one string: its two halves
+  sit in data attributes and a small script joins them, shows the address and copies it on
+  click. Without JS the address is spelled out with " at ", which people read and most
+  scrapers skip. Phone, LinkedIn, GitHub and Hugging Face are plain links.
+*/
+import { getEntry } from "astro:content";
+
+const p = (await getEntry("profile", "aditya"))!.data;
+const [user, domain] = p.email.split("@");
+const tel = `+1${p.phone.replace(/\D/g, "")}`;
+// Displayed so it never wraps mid-number: non-breaking space and hyphen.
+const phoneShown = p.phone.replace(/ /g, "\u00a0").replace(/-/g, "\u2011");
+---
+
+<section id="contact" class="contact" aria-labelledby="contact-title">
+  <h2 id="contact-title">Contact</h2>
+  <ul>
+    <li>
+      Email:
+      <span class="email" data-email-user={user} data-email-domain={domain}>{user} at {domain}</span>
+      <button class="copy" type="button" data-copy-email hidden>Copy</button>
+      <span class="copied" role="status" aria-live="polite"></span>
+    </li>
+    <li>Phone: <a href={`tel:${tel}`}>{phoneShown}</a></li>
+    <li><a href={p.links.linkedin}>LinkedIn</a></li>
+    <li><a href={p.links.github}>GitHub</a></li>
+    <li><a href={p.links.huggingface}>Hugging Face</a></li>
+  </ul>
+</section>
+
+<script>
+  const span = document.querySelector<HTMLElement>("[data-email-user]");
+  const button = document.querySelector<HTMLButtonElement>("[data-copy-email]");
+  const status = document.querySelector<HTMLElement>(".contact .copied");
+  if (span && button) {
+    const address = `${span.dataset.emailUser}@${span.dataset.emailDomain}`;
+    const link = document.createElement("a");
+    link.href = `mailto:${address}`;
+    link.textContent = address;
+    span.replaceChildren(link);
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(address);
+        if (status) status.textContent = "Copied";
+      } catch {
+        if (status) status.textContent = "Select the address to copy it";
+      }
+    });
+  }
+</script>
+
+<style>
+  .contact {
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .contact h2 {
+    margin-bottom: var(--space-s);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .copy {
+    margin-left: var(--space-2xs);
+    font: inherit;
+    font-size: var(--step--1);
+    color: var(--ink);
+    background: none;
+    border: 1px solid var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: 0 var(--space-2xs);
+    cursor: pointer;
+  }
+
+  .copy:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .copied {
+    margin-left: var(--space-2xs);
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+</style>

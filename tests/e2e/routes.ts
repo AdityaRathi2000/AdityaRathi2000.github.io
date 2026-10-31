@@ -2,7 +2,6 @@
 export const ROUTES = [
   { path: "/", name: "home" },
   { path: "/colophon/", name: "colophon" },
-  { path: "/tiles/", name: "tile" },
   { path: "/diagrams/", name: "diagrams" },
   { path: "/resume/", name: "resume" },
 ] as const;
