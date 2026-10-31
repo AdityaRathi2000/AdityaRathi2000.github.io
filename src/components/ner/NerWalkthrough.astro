@@ -1,0 +1,464 @@
+---
+/*
+  Cascade walkthrough on the postings page (plan P6.T3). Server-rendered with every tier inked
+  and every posting shown: that is what visitors without JS, printing, or with reduced motion
+  see. The small script below adds tabs, a tier stepper and "play", which inks the spans tier
+  by tier; it changes only attributes, never the text.
+  Illustrative (Aditya, 2026-10-31): hand-labelled excerpts of public federal postings, not the
+  production model's output. The NER model is the team's; nothing here is presented as his.
+*/
+import raw from "../../data/ner-walkthrough.json";
+import { STEPS, TIERS, TIER_NAMES, noLlmNote, parseWalkthrough, tierCounts } from "../../lib/ner-walkthrough";
+
+const w = parseWalkthrough(raw);
+const date = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+const stepLabels = ["Posting", "Rules", "+ Encoder", "+ LLM"];
+---
+
+<section class="ner" aria-labelledby="ner-title" data-ner data-step={STEPS}>
+  <h2 id="ner-title">How the cascade divides a posting</h2>
+  <p class="ner-intro">
+    Each part of a posting goes to the cheapest tier that can label it: rules for phrases they know, the fine-tuned encoder for
+    most of the rest, and an LLM for what the encoder leaves. Step through the tiers, or press play.
+  </p>
+  <p class="ner-chip">Illustrative: excerpts labelled by hand, not the production model's output. Nothing runs in your browser.</p>
+
+  <div class="ner-controls" data-ner-controls hidden>
+    <div class="ner-tabs" role="tablist" aria-label="Postings">
+      {
+        w.postings.map((p, i) => (
+          <button type="button" role="tab" id={`ner-tab-${p.id}`} aria-controls={`ner-panel-${p.id}`} aria-selected={i === 0 ? "true" : "false"} tabindex={i === 0 ? 0 : -1} data-tab={p.id}>
+            {p.title.replace(/,.*$/, "").replace(/ \(.*\)$/, "")}
+          </button>
+        ))
+      }
+    </div>
+    <div class="ner-steps" role="group" aria-label="Tiers shown">
+      {
+        stepLabels.map((label, i) => (
+          <button type="button" data-step-to={i} aria-pressed={i === STEPS ? "true" : "false"}>
+            {label}
+          </button>
+        ))
+      }
+      <button type="button" class="ner-play" data-play>Play</button>
+    </div>
+  </div>
+
+  {
+    w.postings.map((p) => {
+      const counts = tierCounts(p);
+      const llmNotes = p.blocks.flatMap((b) => b.segments).filter((s) => s.tier === "llm");
+      return (
+        <article class="ner-panel" id={`ner-panel-${p.id}`} aria-labelledby={`ner-h-${p.id}`} data-panel={p.id}>
+          <div class="ner-text">
+            <h3 id={`ner-h-${p.id}`}>
+              {p.title} <span class="ner-agency">{p.agency}</span>
+            </h3>
+            {p.blocks.map((b) => (
+              <div class="ner-block">
+                <p class="ner-heading">{b.heading}</p>
+                <ul>
+                  {b.segments.map((s) => (
+                    <li>
+                      <span class="seg" data-tier={s.tier} title={s.why}>
+                        <span class="seg-tag">
+                          {s.label} <span aria-hidden="true">·</span> {TIER_NAMES[s.tier]}
+                        </span>
+                        <span class="seg-text">{s.text}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <p class="ner-source">
+              From USAJOBS announcement <a href={p.url}>{p.announcement}</a> ({p.agency}, opened {date(p.opened)}). A US government work in
+              the public domain; excerpt lightly trimmed.
+            </p>
+          </div>
+          <aside class="ner-side" aria-label={`Who labelled what in the ${p.title} posting`}>
+            <p class="ner-side-title">Who labelled what in this posting</p>
+            <ol class="ner-counts">
+              {TIERS.map((t) => (
+                <li data-tier={t}>
+                  <span class="ner-tier">{TIER_NAMES[t]}</span>
+                  <span class="num">{counts[t]}</span>
+                  <span class="ner-dots" aria-hidden="true">
+                    {Array.from({ length: counts[t] }, () => (
+                      <span />
+                    ))}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {llmNotes.length > 0 ? (
+              <div class="ner-why">
+                <p class="ner-side-title">Why the LLM was needed</p>
+                <ul>
+                  {llmNotes.map((s) => (
+                    <li>{s.why}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p class="ner-why">{noLlmNote(counts)}</p>
+            )}
+          </aside>
+        </article>
+      );
+    })
+  }
+  <p class="visually-hidden" aria-live="polite" data-ner-status></p>
+</section>
+
+<script>
+  // Tabs, the tier stepper and play. Only attributes change; the server render is the full state.
+  const root = document.querySelector<HTMLElement>("[data-ner]");
+  if (root) {
+    const controls = root.querySelector<HTMLElement>("[data-ner-controls]")!;
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>("[data-tab]")];
+    const panels = [...root.querySelectorAll<HTMLElement>("[data-panel]")];
+    const steps = [...root.querySelectorAll<HTMLButtonElement>("[data-step-to]")];
+    const play = root.querySelector<HTMLButtonElement>("[data-play]")!;
+    const status = root.querySelector<HTMLElement>("[data-ner-status]")!;
+    const names = ["the bare posting", "rules only", "rules and the encoder", "all three tiers"];
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const setStep = (n: number, announce = true) => {
+      root.dataset.step = String(n);
+      steps.forEach((b, i) => b.setAttribute("aria-pressed", String(i === n)));
+      if (announce) status.textContent = `Showing ${names[n]}.`;
+    };
+    const select = (id: string, focus = false) => {
+      tabs.forEach((t) => {
+        const on = t.dataset.tab === id;
+        t.setAttribute("aria-selected", String(on));
+        t.tabIndex = on ? 0 : -1;
+        if (on && focus) t.focus();
+      });
+      panels.forEach((p) => (p.hidden = p.dataset.panel !== id));
+    };
+    const stop = () => {
+      clearTimeout(timer);
+      play.textContent = "Play";
+      root.removeAttribute("data-playing");
+    };
+
+    tabs.forEach((t, i) => {
+      t.addEventListener("click", () => select(t.dataset.tab!, true));
+      t.addEventListener("keydown", (e) => {
+        const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        select(tabs[(i + d + tabs.length) % tabs.length].dataset.tab!, true);
+      });
+    });
+    steps.forEach((b, i) =>
+      b.addEventListener("click", () => {
+        stop();
+        setStep(i);
+      }),
+    );
+    play.addEventListener("click", () => {
+      if (root.hasAttribute("data-playing")) return stop();
+      if (reduce.matches) return setStep(steps.length - 1);
+      root.setAttribute("data-playing", "");
+      play.textContent = "Stop";
+      let n = 0;
+      const tick = () => {
+        setStep(n, n === steps.length - 1);
+        if (n++ < steps.length - 1) timer = setTimeout(tick, 900);
+        else stop();
+      };
+      tick();
+    });
+
+    // Tab semantics only now that the tabs exist; without JS the postings are plain articles.
+    panels.forEach((p) => {
+      p.setAttribute("role", "tabpanel");
+      p.setAttribute("aria-labelledby", `ner-tab-${p.dataset.panel}`);
+    });
+    controls.hidden = false;
+    select(tabs[0].dataset.tab!);
+  }
+</script>
+
+<style>
+  .ner {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 62rem;
+    border-top: 1px solid color-mix(in srgb, var(--ink-2) 35%, transparent);
+    padding-top: var(--space-m);
+  }
+
+  .ner-intro {
+    max-width: var(--measure);
+  }
+
+  .ner-chip {
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    border: 1px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-3xs) var(--space-2xs);
+  }
+
+  .ner-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
+  .ner-controls[hidden] {
+    display: none;
+  }
+
+  .ner-tabs,
+  .ner-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs);
+  }
+
+  .ner-controls button {
+    font: inherit;
+    font-size: var(--step--1);
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--ink-2) 55%, transparent);
+    border-radius: var(--radius-s);
+    padding: var(--space-3xs) var(--space-xs);
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+
+  .ner-controls button:is([aria-selected="true"], [aria-pressed="true"]) {
+    background: var(--accent-wash);
+    border-color: var(--accent);
+  }
+
+  .ner-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-m) var(--space-xl);
+    border: 1.5px dashed var(--ink-2);
+    border-radius: var(--radius-s);
+    padding: var(--space-m) clamp(var(--space-s), 3vw, var(--space-m));
+  }
+
+  /* An author display value would override the hidden attribute; tabs rely on it. */
+  .ner-panel[hidden] {
+    display: none;
+  }
+
+  .ner-panel + .ner-panel {
+    margin-top: var(--space-s);
+  }
+
+  @media (min-width: 52rem) {
+    .ner-panel {
+      grid-template-columns: minmax(0, 1fr) 15rem;
+    }
+  }
+
+  .ner-text {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+  }
+
+  h3 {
+    font-size: var(--step-1);
+  }
+
+  .ner-agency {
+    display: block;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    font-weight: normal;
+  }
+
+  .ner-heading {
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .ner-block ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  /* A span is "inked" when its tier is within the current step: a tag and an underline per tier. */
+  /* The tag sits on its own line (display: table shrinks to fit); the text stays inline so the underline follows every line. */
+  .seg {
+    display: block;
+  }
+
+  .seg-tag {
+    display: table;
+    margin-bottom: 0.15em;
+    font-family: var(--font-mono);
+    font-size: 0.78em;
+    color: var(--ink-2);
+    border: 1px solid currentColor;
+    border-radius: var(--radius-s);
+    padding: 0 0.3em;
+    white-space: nowrap;
+  }
+
+  .seg-text {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 2px;
+    padding-bottom: 2px;
+  }
+
+  .seg[data-tier="rules"] .seg-text {
+    background-image: linear-gradient(var(--ink), var(--ink));
+  }
+
+  .seg[data-tier="encoder"] .seg-text {
+    background-image: linear-gradient(var(--accent), var(--accent));
+  }
+
+  .seg[data-tier="llm"] .seg-text {
+    background-image: linear-gradient(var(--data), var(--data));
+    background-size: 100% 3px;
+  }
+
+  .seg[data-tier="encoder"] .seg-tag {
+    color: var(--accent);
+  }
+
+  .seg[data-tier="llm"] .seg-tag {
+    color: var(--data);
+  }
+
+  /* Not yet reached by the current step: tag hidden (space kept), no underline. */
+  .ner[data-step="0"] .seg .seg-tag,
+  .ner[data-step="1"] .seg:not([data-tier="rules"]) .seg-tag,
+  .ner[data-step="2"] .seg[data-tier="llm"] .seg-tag {
+    visibility: hidden;
+  }
+
+  .ner[data-step="0"] .seg .seg-text,
+  .ner[data-step="1"] .seg:not([data-tier="rules"]) .seg-text,
+  .ner[data-step="2"] .seg[data-tier="llm"] .seg-text {
+    background-size: 0% 2px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .seg-text {
+      transition: background-size 300ms var(--ease-out);
+    }
+  }
+
+  .ner-source {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .ner-side {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    font-size: var(--step--1);
+  }
+
+  .ner-side-title {
+    font-style: italic;
+    color: var(--ink-2);
+  }
+
+  .ner-counts {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .ner-counts li {
+    display: grid;
+    grid-template-columns: 5rem 2ch 1fr;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .ner-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+  }
+
+  .ner-dots span {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  .ner-counts [data-tier="encoder"] .ner-dots span {
+    background: var(--accent);
+  }
+
+  .ner-counts [data-tier="llm"] .ner-dots span {
+    background: var(--data);
+  }
+
+  .ner[data-step="0"] .ner-counts li,
+  .ner[data-step="1"] .ner-counts li:not([data-tier="rules"]),
+  .ner[data-step="2"] .ner-counts li[data-tier="llm"],
+  .ner:is([data-step="0"], [data-step="1"], [data-step="2"]) .ner-why {
+    opacity: 0.35;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ner-counts li,
+    .ner-why {
+      transition: opacity 300ms var(--ease-out);
+    }
+  }
+
+  .ner-why ul {
+    padding-left: 1.1em;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  @media print {
+    .ner {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .ner-controls {
+      display: none !important;
+    }
+
+    .ner-counts li,
+    .ner-why {
+      opacity: 1 !important;
+    }
+
+    .ner-panel[hidden] {
+      display: grid !important;
+    }
+
+    .ner .seg-tag {
+      visibility: visible !important;
+    }
+
+    .ner .seg .seg-text {
+      background-size: 100% 2px !important;
+    }
+  }
+</style>

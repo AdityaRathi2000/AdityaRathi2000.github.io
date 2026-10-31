@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "provenance": "fixture",
+  "generated_at": "2026-10-04T06:00:00Z",
+  "as_of": "2026-09-30",
+  "window": {
+    "start": "2026-07-01",
+    "end": "2026-09-30"
+  },
+  "model_version": "fixture",
+  "n_settled_forecasts": 16180,
+  "city_days": 1840,
+  "corp_curve": [
+    {
+      "x": 0.03,
+      "y": 0.08,
+      "lo": 0.052,
+      "hi": 0.108
+    },
+    {
+      "x": 0.08,
+      "y": 0.129,
+      "lo": 0.098,
+      "hi": 0.16
+    },
+    {
+      "x": 0.13,
+      "y": 0.178,
+      "lo": 0.143,
+      "hi": 0.213
+    },
+    {
+      "x": 0.18,
+      "y": 0.225,
+      "lo": 0.186,
+      "hi": 0.264
+    },
+    {
+      "x": 0.24,
+      "y": 0.281,
+      "lo": 0.239,
+      "hi": 0.323
+    },
+    {
+      "x": 0.3,
+      "y": 0.335,
+      "lo": 0.291,
+      "hi": 0.379
+    },
+    {
+      "x": 0.36,
+      "y": 0.386,
+      "lo": 0.34,
+      "hi": 0.432
+    },
+    {
+      "x": 0.42,
+      "y": 0.437,
+      "lo": 0.39,
+      "hi": 0.484
+    },
+    {
+      "x": 0.48,
+      "y": 0.486,
+      "lo": 0.437,
+      "hi": 0.535
+    },
+    {
+      "x": 0.54,
+      "y": 0.535,
+      "lo": 0.486,
+      "hi": 0.584
+    },
+    {
+      "x": 0.6,
+      "y": 0.583,
+      "lo": 0.535,
+      "hi": 0.631
+    },
+    {
+      "x": 0.66,
+      "y": 0.633,
+      "lo": 0.586,
+      "hi": 0.68
+    },
+    {
+      "x": 0.72,
+      "y": 0.684,
+      "lo": 0.638,
+      "hi": 0.73
+    },
+    {
+      "x": 0.78,
+      "y": 0.737,
+      "lo": 0.693,
+      "hi": 0.781
+    },
+    {
+      "x": 0.84,
+      "y": 0.792,
+      "lo": 0.751,
+      "hi": 0.833
+    },
+    {
+      "x": 0.9,
+      "y": 0.848,
+      "lo": 0.81,
+      "hi": 0.886
+    },
+    {
+      "x": 0.95,
+      "y": 0.897,
+      "lo": 0.862,
+      "hi": 0.932
+    }
+  ],
+  "histogram": [
+    {
+      "edge": 0.0,
+      "count": 5200
+    },
+    {
+      "edge": 0.1,
+      "count": 1900
+    },
+    {
+      "edge": 0.2,
+      "count": 1200
+    },
+    {
+      "edge": 0.3,
+      "count": 900
+    },
+    {
+      "edge": 0.4,
+      "count": 800
+    },
+    {
+      "edge": 0.5,
+      "count": 760
+    },
+    {
+      "edge": 0.6,
+      "count": 820
+    },
+    {
+      "edge": 0.7,
+      "count": 1000
+    },
+    {
+      "edge": 0.8,
+      "count": 1500
+    },
+    {
+      "edge": 0.9,
+      "count": 2100
+    }
+  ],
+  "scores": {
+    "brier": {
+      "value": 0.071,
+      "ci": [
+        0.066,
+        0.077
+      ]
+    },
+    "crps": {
+      "value": 1.42,
+      "ci": [
+        1.35,
+        1.5
+      ]
+    },
+    "log": {
+      "value": 0.231,
+      "ci": [
+        0.219,
+        0.244
+      ]
+    }
+  },
+  "skill_vs": {
+    "climatology": {
+      "value": 0.41,
+      "ci": [
+        0.37,
+        0.45
+      ]
+    },
+    "nwp_only": {
+      "value": 0.12,
+      "ci": [
+        0.08,
+        0.16
+      ]
+    },
+    "market_implied": {
+      "value": 0.03,
+      "ci": [
+        -0.01,
+        0.07
+      ]
+    }
+  },
+  "calibration": {
+    "smooth_ece": {
+      "value": 0.018,
+      "ci": [
+        0.012,
+        0.026
+      ],
+      "definition": "Smooth expected calibration error: the average gap between forecast probability and kernel-smoothed observed frequency, weighted by how often each forecast is made."
+    },
+    "corp_decomposition": {
+      "mcb": 0.004,
+      "dsc": 0.121,
+      "unc": 0.188
+    }
+  },
+  "bootstrap": {
+    "method": "block-by-date",
+    "resamples": 1000
+  },
+  "gate_status": "pass",
+  "tests": {
+    "count": 0,
+    "commit": "0000000"
+  }
+}

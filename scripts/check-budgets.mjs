@@ -51,7 +51,8 @@ function walk(file, seen, lazyRoots) {
   for (const m of text.matchAll(/(?:^|[;\s}])import\s*(?:[^"'()]*?from\s*)?["']([^"']+\.m?js)["']/g)) {
     total += walk(fileFor(m[1], file), seen, lazyRoots);
   }
-  for (const m of text.matchAll(/import\(\s*["']([^"']+\.m?js)["']\s*\)/g)) {
+  // The bundler writes dynamic imports with backticks: import(`./chunk.js`).
+  for (const m of text.matchAll(/import\(\s*["'`]([^"'`]+\.m?js)["'`]\s*\)/g)) {
     lazyRoots.add(fileFor(m[1], file));
   }
   return total;

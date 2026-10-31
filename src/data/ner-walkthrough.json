@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "illustrative": true,
+    "annotated": "2026-10-31",
+    "note": "Excerpts from public USAJOBS announcements (works of the US government, public domain), lightly trimmed. Labels and tiers were assigned by hand to show how the cascade divides the work; they are not output from the production model."
+  },
+  "postings": [
+    {
+      "id": "data-scientist",
+      "title": "Data Scientist",
+      "agency": "Department of the Air Force",
+      "announcement": "USTC-25-12790917-DH",
+      "opened": "2025-08-27",
+      "url": "https://www.usajobs.gov/job/844423700",
+      "blocks": [
+        {
+          "heading": "Duties",
+          "segments": [
+            {
+              "text": "Perform data acquisition, processing, and cleaning of large data sets",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task with no heading phrase a rule knows; the encoder labels it from its content."
+            },
+            {
+              "text": "Leverage machine learning and other analytical techniques to interpret large amounts of data to gain insight and identify patterns",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "Another task; the encoder handles it like the one before."
+            },
+            {
+              "text": "Deliver written status updates, formal technical reports, and briefings to leaders",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "Plain task wording: the encoder's everyday work."
+            }
+          ]
+        },
+        {
+          "heading": "Qualifications",
+          "segments": [
+            {
+              "text": "One year of specialized experience equivalent to the GS-12 grade level in the Federal service",
+              "label": "experience",
+              "tier": "rules",
+              "why": "A fixed federal phrase (“specialized experience equivalent to”): a rule matches it."
+            },
+            {
+              "text": "Experience using cybersecurity principles, secure software development / acquisition, data security, risk management processes",
+              "label": "skills",
+              "tier": "encoder",
+              "why": "Starts like experience but lists skills; the encoder reads past the first word."
+            },
+            {
+              "text": "Degree; Mathematics, statistics, computer science, data science or field directly related to the position.",
+              "label": "education",
+              "tier": "rules",
+              "why": "“Degree;” followed by fields of study: a rule matches it."
+            },
+            {
+              "text": "Combination of education and experience: Courses equivalent to a major field of study (30 semester hours) as shown in paragraph A above, plus additional education or appropriate experience",
+              "label": "education",
+              "tier": "llm",
+              "why": "Trades education against experience and points back to another paragraph; left for the LLM."
+            }
+          ]
+        },
+        {
+          "heading": "Conditions of employment",
+          "segments": [
+            {
+              "text": "Must be a U.S. Citizen",
+              "label": "conditions",
+              "tier": "rules",
+              "why": "A citizenship phrase: a rule matches it."
+            },
+            {
+              "text": "Employee must obtain/maintain a Non-Critical Sensitive (Secret) security clearance",
+              "label": "conditions",
+              "tier": "encoder",
+              "why": "A requirement with no fixed phrase; the encoder labels it."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "registered-nurse",
+      "title": "Registered Nurse, Geriatrics and Extended Care",
+      "agency": "Department of Veterans Affairs",
+      "announcement": "CBSX-13093858-27-AST",
+      "opened": "2026-10-16",
+      "url": "https://www.usajobs.gov/job/889193300",
+      "blocks": [
+        {
+          "heading": "Duties",
+          "segments": [
+            {
+              "text": "Will perform job duties independently and in accordance with established departmental and hospital procedures.",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A duty without a known phrase; the encoder labels it."
+            },
+            {
+              "text": "Reports to the CLC Nurse Manager and Assistant Nurse Manager, but must work in collaboration with the Charge Nurses, Staff Nurses, Nursing Assistants, Medical Support Assistants, Social Workers, Minimum Data Set Coordinators, Restorative and Recreational care, and Providers of the assigned team.",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "Long, but plainly about the work; the encoder labels it."
+            }
+          ]
+        },
+        {
+          "heading": "Basic requirements",
+          "segments": [
+            {
+              "text": "English Language Proficiency. In accordance with 38 U.S.C. 7403(f), no person shall serve in direct patient care positions unless they are proficient in basic written and spoken English.",
+              "label": "skills",
+              "tier": "llm",
+              "why": "A statute about language: a skill or a condition of employment? It needs judgement, so the LLM decides."
+            },
+            {
+              "text": "Graduate of a school of professional nursing approved by the appropriate accrediting agency and accredited by one of the following accrediting bodies: The Accreditation Commission for Education in Nursing (ACEN) or The Commission on Collegiate Nursing Education (CCNE).",
+              "label": "education",
+              "tier": "encoder",
+              "why": "Names accrediting bodies rather than a degree; the encoder still reads it as education."
+            }
+          ]
+        },
+        {
+          "heading": "Licensure",
+          "segments": [
+            {
+              "text": "Current, full, active, and unrestricted registration as a graduate professional nurse in a State, Territory or Commonwealth (i.e., Puerto Rico) of the United States, or the District of Columbia.",
+              "label": "certifications",
+              "tier": "rules",
+              "why": "“Unrestricted registration as a graduate professional nurse”: a licence phrase a rule matches."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "electrician",
+      "title": "Electrician",
+      "agency": "U.S. Coast Guard",
+      "announcement": "20250204-77510-007774-IM-DE",
+      "opened": "2025-09-15",
+      "url": "https://www.usajobs.gov/job/845971700",
+      "blocks": [
+        {
+          "heading": "Duties",
+          "segments": [
+            {
+              "text": "Installing, modifying, repairing, loading and testing systems, circuits, equipment and controls",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            },
+            {
+              "text": "Interpreting and applying the National Electrical Code, local codes, building plans, blueprints, wiring diagrams",
+              "label": "skills",
+              "tier": "encoder",
+              "why": "Listed as a duty but names knowledge; the encoder labels it a skill."
+            },
+            {
+              "text": "Determining location of existing electrical devices and service entrances",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            },
+            {
+              "text": "Planning and laying out work, tracing hard-to-locate defects or problems",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            },
+            {
+              "text": "Installing, modifying, repairing, and maintaining electrical lines, circuits, systems",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "it-specialist",
+      "title": "IT Specialist (Customer Support)",
+      "agency": "Army National Guard",
+      "announcement": "KY-13031363-AR-26-164",
+      "opened": "2026-09-02",
+      "url": "https://www.usajobs.gov/job/883240300",
+      "blocks": [
+        {
+          "heading": "Duties",
+          "segments": [
+            {
+              "text": "…install, configure, troubleshoot, and provide maintenance and training in response to customer requirements",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task cut from a longer sentence; the encoder labels it."
+            },
+            {
+              "text": "Provide Tier II support for end-user hardware failures",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            },
+            {
+              "text": "Re-image customer workstations and resolve complex problems",
+              "label": "responsibilities",
+              "tier": "encoder",
+              "why": "A task; the encoder labels it."
+            },
+            {
+              "text": "Detect damaged or lost files, optimize disk management, measure system performance, control system security",
+              "label": "skills",
+              "tier": "encoder",
+              "why": "A run of abilities; the encoder labels them as skills."
+            }
+          ]
+        },
+        {
+          "heading": "Certification",
+          "segments": [
+            {
+              "text": "Must obtain and maintain Security+ Certification within six (6) months of appointment",
+              "label": "certifications",
+              "tier": "rules",
+              "why": "A named certification (Security+): a rule matches it."
+            },
+            {
+              "text": "Incumbent must complete appropriate training and obtain required certifications IAW DoDI 8140 or DOD 8570.01M.",
+              "label": "certifications",
+              "tier": "encoder",
+              "why": "Names a policy, not a certification, so no rule fires; the encoder still reads it as a certification requirement."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

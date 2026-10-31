@@ -11,6 +11,13 @@ import KalshiThumb from "../../components/thumbs/KalshiThumb.astro";
 import ManifoldThumb from "../../components/thumbs/ManifoldThumb.astro";
 import PostingsThumb from "../../components/thumbs/PostingsThumb.astro";
 import RiskCoverageThumb from "../../components/thumbs/RiskCoverageThumb.astro";
+import Reliability from "../../components/kalshi/Reliability.astro";
+import fixture from "../../data/kalshi/reliability.fixture.json";
+import { parseReliability } from "../../lib/kalshi-reliability";
+
+// The weather model's reliability chart, on its fixture: shown here only, never on the case-study
+// page, until phase 7 delivers live data (Aditya, 2026-10-31).
+const reliability = parseReliability(fixture, new Date());
 
 const figures = [
   { name: "cvi-funnel", heading: "Credential Value Index" },
@@ -42,6 +49,11 @@ const figures = [
       </section>
     ))
   }
+
+  <section aria-labelledby="h-reliability">
+    <h2 id="h-reliability">Weather-model reliability (fixture)</h2>
+    <Reliability data={reliability.data} stale={reliability.stale} />
+  </section>
 </Base>
 
 <style>

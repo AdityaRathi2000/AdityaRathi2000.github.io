@@ -2,11 +2,15 @@
 /*
   Case-study page (plan P5.T1): title and summary, an evidence strip of the headline numbers
   that are ready (each with its comparator or scope note, never a draft), the architecture
-  figure, the prose (MDX), What I got wrong, optional engineering notes, then previous / next.
+  figure, the prose (MDX), the interactive explorer when the study has one (plan P6), What I got
+  wrong, optional engineering notes, then previous / next.
 */
 import { getEntry, type CollectionEntry } from "astro:content";
 import Base from "./Base.astro";
 import Diagram from "../components/Diagram.astro";
+import ErExplorer from "../components/er/ErExplorer.astro";
+import KalshiResult from "../components/kalshi/KalshiResult.astro";
+import NerWalkthrough from "../components/ner/NerWalkthrough.astro";
 import Metric from "../components/Metric.astro";
 import MetricNote from "../components/MetricNote.astro";
 
@@ -70,6 +74,10 @@ const noteLabel: Record<string, string> = { reruns: "Reruns", cost: "Cost", line
     <div class="prose">
       <slot />
     </div>
+
+    {d.interactive === "er-funnel" && <ErExplorer />}
+    {d.interactive === "kalshi-reliability" && <KalshiResult />}
+    {d.interactive === "ner-walkthrough" && <NerWalkthrough />}
 
     <section class="wrong" aria-labelledby="wrong-title">
       <h2 id="wrong-title">What I got wrong</h2>
