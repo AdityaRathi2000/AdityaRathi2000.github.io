@@ -15,7 +15,7 @@
     "astro": "astro",
     "validate:html": "html-validate \"dist/**/*.html\"",
     "budgets": "node scripts/check-budgets.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --project=chromium",
     "lhci": "lhci autorun",
     "verify": "pnpm check && pnpm test:unit && pnpm check:numbers && pnpm check:resume && pnpm build && pnpm validate:html && pnpm budgets && pnpm test:e2e",
     "test:unit": "node --test \"tests/unit/*.test.ts\"",

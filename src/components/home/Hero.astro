@@ -177,6 +177,12 @@ const p = (await getEntry("profile", "aditya"))!.data;
       padding-block: var(--space-2xs);
     }
 
+    /* Keyboard focus would otherwise stop under the column above (WCAG 2.4.11). Bound on its
+       height: the figure is at most 44vh, caption and padding under 7rem. */
+    :global(.hero-motion) .hero-steps :global(:is(a, summary, button)) {
+      scroll-margin-top: calc(44vh + 7rem);
+    }
+
     :global(.hero-motion) .hero-figure :global(svg) {
       max-height: 44vh;
       width: auto;

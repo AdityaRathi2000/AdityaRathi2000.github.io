@@ -3,6 +3,7 @@
 // numbers, responds to its controls without changing height, and degrades to a readable static
 // state without JS or without its data.
 import { expect, test, type Page } from "@playwright/test";
+import { expectSameLayout } from "./layout";
 
 const PATH = "/work/cvi-entity-resolution/";
 const DATA = "/data/er-sample.json";
@@ -65,14 +66,14 @@ test("the controls change the result without changing the explorer's height", as
   expect(Number(low.precision)).toBeLessThan(Number(start.precision));
   expect(low.largestNote).toMatch(/from \d+ true organisations/);
   await expect(page.locator(".er-card:not([data-empty]):not([data-ok])").first()).toBeVisible();
-  expect(await height()).toBe(h0);
+  expectSameLayout(await height(), h0, "explorer height");
 
   // A narrower blocking key compares fewer pairs.
   await page.getByLabel("same state and town").check();
   await expect(page.locator('[data-out="compared"]')).not.toHaveText(low.compared!);
   const town = await readOuts(page);
   expect(Number(town.compared!.replace(/,/g, ""))).toBeLessThan(Number(low.compared!.replace(/,/g, "")));
-  expect(await height()).toBe(h0);
+  expectSameLayout(await height(), h0, "explorer height");
 
   // Screen readers get one summary of the new setting.
   await expect(page.locator('[data-er] [aria-live="polite"]')).toContainText("Same state and town, merging at 0.55");

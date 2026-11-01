@@ -10,7 +10,9 @@ import { ROUTES } from "./routes";
 const BUDGET = 0.035;
 
 for (const route of ROUTES) {
-  test(`layout shift on a slow first visit: ${route.name}`, async ({ page }) => {
+  test(`layout shift on a slow first visit: ${route.name}`, async ({ page, browserName }) => {
+    // CDP throttling and the layout-shift entry type exist only in Chromium.
+    test.skip(browserName !== "chromium", "Chromium-only APIs (CDP, layout-shift entries)");
     await page.setViewportSize({ width: 412, height: 823 });
     const cdp = await page.context().newCDPSession(page);
     await cdp.send("Network.enable");

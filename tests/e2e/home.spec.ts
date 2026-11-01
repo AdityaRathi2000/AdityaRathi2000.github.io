@@ -48,16 +48,22 @@ test("home copy stays under 350 words", async ({ page }) => {
   expect(words).toBeLessThanOrEqual(350);
 });
 
-test("the email address is never one string in the HTML, and copies on click", async ({ page, context, request }) => {
+test("the email address is never one string in the HTML, and copies on click", async ({ page, context, request, browserName }) => {
   const html = await (await request.get("/")).text();
   expect(html).not.toContain("aditya.rathi2000@gmail.com");
-  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  // Headless Chromium refuses writeText without the grant; Firefox and WebKit copy on the click
+  // alone and reject these permission names (run 41343883186).
+  if (browserName === "chromium") await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/");
   const link = page.locator('#contact a[href^="mailto:"]');
   await expect(link).toHaveText("aditya.rathi2000@gmail.com");
   await page.locator("[data-copy-email]").click();
   await expect(page.locator("#contact .copied")).toHaveText("Copied");
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe("aditya.rathi2000@gmail.com");
+  // Read it back the way a reader would, by pasting (WebKit refuses readText() without a grant).
+  await page.evaluate(() => document.body.append(Object.assign(document.createElement("textarea"), { id: "paste-check" })));
+  await page.locator("#paste-check").focus();
+  await page.keyboard.press("ControlOrMeta+V");
+  await expect(page.locator("#paste-check")).toHaveValue("aditya.rathi2000@gmail.com");
 });
 
 test.describe("hero with motion", () => {
