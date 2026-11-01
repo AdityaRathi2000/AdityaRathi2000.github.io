@@ -4,12 +4,10 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { test } from "@playwright/test";
 
 const out: Record<string, unknown> = {};
-const save = (browser: string) => {
+const save = (browser: string, probe: string) => {
   mkdirSync("screenshots/ci", { recursive: true });
-  writeFileSync(`screenshots/ci/diag-${browser}.json`, JSON.stringify(out, null, 2));
+  writeFileSync(`screenshots/ci/diag-${browser}-${probe}.json`, JSON.stringify(out, null, 2));
 };
-
-test.describe.configure({ mode: "serial" });
 
 // F4: which <video> configurations make this engine fetch the file without a play press?
 test("diag F4: video fetches under preload=none", async ({ page, browserName }) => {
@@ -51,7 +49,7 @@ test("diag F4: video fetches under preload=none", async ({ page, browserName }) 
     return [n, { networkState: v.networkState, readyState: v.readyState, buffered: v.buffered.length, preload: v.preload }];
   })), Object.keys(variants));
   out.F4 = { original, states, requests: reqs, finished: done };
-  save(browserName);
+  save(browserName, "F4");
 });
 
 // F2: which clipboard permission names does this engine accept, and can the copy be observed?
@@ -63,9 +61,9 @@ test("diag F2: clipboard", async ({ browser, browserName }) => {
     accepted[p] = await c.grantPermissions([p]).then(() => "ok", (e) => String(e).split("\n")[0]);
     await c.close();
   }
+  // Round 2: grant nothing; observe the copy through the UI and a keyboard paste only.
   const ctx = await browser.newContext();
-  const grantable = Object.keys(accepted).filter((p) => accepted[p] === "ok");
-  if (grantable.length) await ctx.grantPermissions(grantable);
+  const grantable: string[] = [];
   const page = await ctx.newPage();
   await page.goto("/");
   await page.locator("[data-copy-email]").click();
@@ -84,7 +82,7 @@ test("diag F2: clipboard", async ({ browser, browserName }) => {
   await page.keyboard.press("ControlOrMeta+V");
   const pasted = await page.locator("#diag-paste").inputValue();
   out.F2 = { accepted, granted: grantable, copiedText, readText, pastedLength: pasted.length, pastedMatches: pasted === "aditya.rathi2000@gmail.com" };
-  save(browserName);
+  save(browserName, "F2");
   await ctx.close();
 });
 
@@ -99,5 +97,5 @@ test("diag F1/F3: measurement jitter without interaction", async ({ page, browse
   for (let i = 0; i < 5; i++) heights.push((await er.boundingBox())!.height);
   const rect = await er.evaluate((el) => ({ rectHeight: el.getBoundingClientRect().height, offsetHeight: (el as HTMLElement).offsetHeight }));
   out.F1F3 = { boundingBoxHeights: heights, rect, x60: heights.map((h) => h * 60) };
-  save(browserName);
+  save(browserName, "F1F3");
 });
