@@ -1,4 +1,4 @@
-// Per-route JS and font budgets (plan §4 / P1.T6), measured on dist/ after `astro build`.
+// Per-route JS, font and HTML budgets (plan §4 / P1.T6), measured on dist/ after `astro build`.
 //
 // size-limit measures files, not routes; Astro hashes chunks and shares them between pages,
 // so this walks each page's script graph instead:
@@ -19,6 +19,14 @@ const BUDGETS = [
   { match: () => true, first: 40 * KB, lazy: 60 * KB, label: "other" },
 ];
 const MAX_PRELOADED_FONTS = 2;
+
+// A page's HTML must arrive in TCP's first flight: 10 segments x 1,460 B = 14,600 B on the wire, about 100 B of
+// it headers. Over that, the document needs a second round trip before first paint (+150 ms LCP in Lighthouse's
+// simulation; the postings page at 15,257 B measured 1.80 s against a 1.70 s budget, 2026-11-01). Measured at
+// gzip level 6, the level the Lighthouse server (and most CDNs) send. /diagrams/ is a noindex specimen page.
+const HTML_FIRST_FLIGHT = 14_400;
+const HTML_EXEMPT = new Set(["/diagrams/"]);
+const htmlGz = (buf) => gzipSync(buf, { level: 6 }).length;
 
 const gz = (buf) => gzipSync(buf, { level: 9 }).length;
 
@@ -88,7 +96,9 @@ for (const file of htmlFiles(DIST)) {
 
   const fonts = [...html.matchAll(/<link\b[^>]*rel=["']preload["'][^>]*as=["']font["']/g)].length;
 
-  const over = first > budget.first || lazy > budget.lazy || fonts > MAX_PRELOADED_FONTS;
+  const doc = htmlGz(Buffer.from(html));
+  const docOver = !HTML_EXEMPT.has(route) && doc > HTML_FIRST_FLIGHT;
+  const over = first > budget.first || lazy > budget.lazy || fonts > MAX_PRELOADED_FONTS || docOver;
   if (over) failed = true;
   rows.push({
     route,
@@ -96,6 +106,7 @@ for (const file of htmlFiles(DIST)) {
     "first-load gz": `${(first / KB).toFixed(1)} / ${budget.first / KB} KB`,
     "lazy gz": `${(lazy / KB).toFixed(1)} / ${budget.lazy / KB} KB`,
     "preloaded fonts": `${fonts} / ${MAX_PRELOADED_FONTS}`,
+    "html gz": HTML_EXEMPT.has(route) ? `${doc} (exempt)` : `${doc} / ${HTML_FIRST_FLIGHT} B`,
     status: over ? "OVER" : "ok",
   });
 }

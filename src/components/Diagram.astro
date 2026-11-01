@@ -38,7 +38,9 @@ for (const n of spec.rows.flat()) {
 }
 
 const L = layout(spec, counters);
-const s = sketch(spec.seed);
+// Whole-unit coordinates: the postings page's HTML crossed TCP's first round trip (15.3 KB on the wire, LCP
+// 1.80 s); a 468-unit diagram drawn at most ~1.4x moves a point under 1 px, within rough.js's own jitter.
+const s = sketch(spec.seed, { precision: 0 });
 const P = GEOMETRY.pad;
 const id = `dg-${name}`;
 

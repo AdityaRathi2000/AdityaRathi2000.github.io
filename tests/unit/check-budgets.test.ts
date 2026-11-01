@@ -28,3 +28,34 @@ for (const [name, q] of [["double quotes", '"'], ["single quotes", "'"], ["backt
     assert.ok(lazyKb(q) > 5, `lazy chunk not counted with ${name}`);
   });
 }
+
+// The document itself must fit TCP's first flight (scripts/check-budgets.mjs HTML_FIRST_FLIGHT). Regression guard for
+// the postings page, whose 15,257 B document cost a round trip and 150 ms of LCP (found 2026-11-01).
+function budgetRun(pages: Record<string, number>): { status: number; out: string } {
+  const dist = mkdtempSync(join(tmpdir(), "budgets-html-"));
+  for (const [route, bytes] of Object.entries(pages)) {
+    mkdirSync(join(dist, route), { recursive: true });
+    const noise = randomBytes(Math.ceil((bytes * 3) / 4)).toString("base64").slice(0, bytes);
+    writeFileSync(join(dist, route, "index.html"), `<!doctype html><p>${noise}</p>`);
+  }
+  try {
+    const out = execFileSync("node", ["scripts/check-budgets.mjs"], { env: { ...process.env, BUDGET_DIST: dist }, encoding: "utf8", stdio: "pipe" });
+    return { status: 0, out };
+  } catch (e) {
+    const err = e as { status: number; stdout: string; stderr: string };
+    return { status: err.status, out: err.stdout + err.stderr };
+  }
+}
+
+test("a page whose gzipped HTML is over the first flight fails the budget", () => {
+  // Base64 noise gzips to about 76% of its length: 20,000 characters is about 15.2 KB on the wire.
+  const r = budgetRun({ "": 2_000, "work/heavy": 20_000 });
+  assert.equal(r.status, 1, r.out);
+  assert.match(r.out, /\/work\/heavy\/.*OVER/);
+});
+
+test("pages inside the first flight pass, and the noindex /diagrams/ page is exempt", () => {
+  const r = budgetRun({ "": 2_000, "work/light": 12_000, diagrams: 40_000 });
+  assert.equal(r.status, 0, r.out);
+  assert.match(r.out, /\(exempt\)/);
+});
