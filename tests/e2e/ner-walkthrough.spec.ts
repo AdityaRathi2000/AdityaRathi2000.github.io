@@ -1,6 +1,7 @@
 // P6.T3 behaviour: the postings walkthrough says it is illustrative, shows everything without JS,
 // and with JS offers tabs (arrow keys), a tier stepper and play, never fetching data.
 import { expect, test, type Page } from "@playwright/test";
+import { expectSameLayout } from "./layout";
 
 const PATH = "/work/postings-extraction-stack/";
 const visibleTags = (page: Page, tier: string) =>
@@ -52,7 +53,7 @@ test("the stepper inks tiers in cascade order without moving the text", async ({
   await page.getByRole("button", { name: "+ Encoder" }).click();
   expect(new Set(await visibleTags(page, "encoder"))).toEqual(new Set(["visible"]));
   expect(new Set(await visibleTags(page, "llm"))).toEqual(new Set(["hidden"]));
-  expect(await top()).toBe(y0);
+  expectSameLayout(await top(), y0, "segment text top");
   await expect(page.locator("[data-ner-status]")).toHaveText("Showing rules and the encoder.");
 });
 

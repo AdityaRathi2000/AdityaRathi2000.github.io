@@ -54,12 +54,16 @@ test("the case studies chain in order, and the home rows link to them", async ({
 });
 
 test("the Manifold teaser never plays or downloads by itself", async ({ page }) => {
-  const media: string[] = [];
-  page.on("request", (r) => r.url().endsWith(".mp4") && media.push(r.url()));
+  // Server answers, not request events: WebKit announces a request for a preload="none" video and
+  // ends it with status 0 (run 41344367780). Body sizes can't be used either: Chromium aborts a
+  // range request after data has arrived and resumes from cache with a 0-byte 206.
+  const answered: string[] = [];
+  page.on("response", (r) => r.url().endsWith(".mp4") && r.status() > 0 && answered.push(`${r.status()} ${r.url()}`));
   await page.goto("/work/manifold/");
   const v = page.locator("video");
   await expect(v).toHaveAttribute("preload", "none");
   expect(await v.evaluate((el: HTMLVideoElement) => ({ autoplay: el.autoplay, muted: el.muted, paused: el.paused }))).toEqual({ autoplay: false, muted: true, paused: true });
-  await page.waitForTimeout(500);
-  expect(media, "video fetched before the reader pressed play").toEqual([]);
+  await page.waitForTimeout(2000);
+  expect(await v.evaluate((el: HTMLVideoElement) => el.readyState), "video data loaded before the reader pressed play").toBe(0);
+  expect(answered, "the server sent video before the reader pressed play").toEqual([]);
 });
