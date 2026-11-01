@@ -7,7 +7,7 @@ import { LIVE_DATA_SELECTOR, ROUTES, SCHEMES, VIEWPORTS } from "./routes";
 for (const route of ROUTES) {
   for (const width of VIEWPORTS) {
     for (const scheme of SCHEMES) {
-      test(`${route.name} @${width} ${scheme}`, async ({ page }) => {
+      test(`${route.name} @${width} ${scheme}`, async ({ page, browserName }) => {
         const errors: string[] = [];
         page.on("pageerror", (e) => errors.push(e.message));
         page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
@@ -21,7 +21,7 @@ for (const route of ROUTES) {
         expect(overflow, "horizontal overflow in px").toBeLessThanOrEqual(0);
 
         await page.screenshot({
-          path: `screenshots/ci/${route.name}-${width}-${scheme}.png`,
+          path: `screenshots/ci/${browserName}/${route.name}-${width}-${scheme}.png`,
           fullPage: true,
           mask: [page.locator(LIVE_DATA_SELECTOR)],
         });
